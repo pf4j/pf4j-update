@@ -152,7 +152,13 @@ Each plugin registered in `plugins.json` has an unique id, a description, a (dis
 a project url, and a list with releases. New properties may appear in the future.  
 The **id** field is mandatory. Also the **releases** field must contains at least one element.  
 The last (current) release of the plugin is calculated taking into account by the _version_ property. In our example,
-the last release for each plugin is the release with version _0.8.0_.
+the last release for each plugin is the release with version _0.8.0_.  
+The **url** value (from plugins.json) for each release is relative to the repository's url but the value for **UpdateRepository.PluginRelease.url** is absolute.   
+For plugin1 example:  
+`"url": "http://localhost:8081/"` (repositories.json)  
+`"url": "pf4j-demo-plugin2/0.8.0/pf4j-demo-plugin2-0.8.0.zip"` (plugins.json)  
+and the `UpdateRepository.PluginRelease.url` value for release 0.8.0 of plugin1 is   `http://localhost:8081/pf4j-demo-plugin2/0.8.0/pf4j-demo-plugin2-0.8.0.zip`  
+NOTE: Don't forget to put */* to the end of url values from repositories.json.  
 
 In the _downloads_ folder of the project you have a repository (plugins.json and artifacts - plugins archives) used by the test applications.
 The structure of the repository is:
