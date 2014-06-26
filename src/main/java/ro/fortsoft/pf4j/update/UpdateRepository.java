@@ -106,7 +106,6 @@ public class UpdateRepository {
         public String name;
         public String description;
         public String provider;
-        public String currentVersion;
         public String projectUrl;
         public List<PluginRelease> releases;
 
