@@ -107,10 +107,10 @@ In the root of the project you have a repositories.json file used by the test ap
 
 For more information please see the test sources (UpdateTest, ...). It's a good idea to run these tests and to see the results.
 
-The repository's structure
+Repository structure
 -------------------
 Each repository exposes multiple plugins using a `plugins.json` file.  
-Bellow I registered two plugins: welcome-plugin and hello-plugin.
+Bellow I registered two plugins: _welcome-plugin_ and _hello-plugin_.
 ```json
 [
   {
