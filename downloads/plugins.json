@@ -1,0 +1,24 @@
+[
+  {
+    "id": "welcome-plugin",
+    "description": "Welcome plugin",
+    "releases": [
+      {
+        "version": "0.9.0",
+        "date": "Jun 25, 2014 9:58:35 PM",
+        "url": "pf4j-demo-plugin1/0.9.0/pf4j-demo-plugin1-0.9.0-SNAPSHOT.zip"
+      }
+    ]
+  },
+  {
+    "id": "hello-plugin",
+    "description": "Hello plugin",
+    "releases": [
+      {
+        "version": "0.9.0",
+        "date": "Jun 25, 2014 9:58:35 PM",
+        "url": "pf4j-demo-plugin2/0.9.0/pf4j-demo-plugin2-0.9.0-SNAPSHOT.zip"
+      }
+    ]
+  }
+]
