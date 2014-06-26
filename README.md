@@ -14,7 +14,7 @@ How to use
 
 _UpdateManager_ can work with multiple repositories (local and remote). All repositories are defined in a `repositories.json` file.
 
-For a remote repository the repository.json looks like:
+Bellow I have a repositories.json file that contains one remote repository.
 ```json
 [
   {
@@ -24,7 +24,7 @@ For a remote repository the repository.json looks like:
 ]
 ```
 
-For a local repository the repository.json looks like:
+Bellow I have a repositories.json file that contains one local repository.
 ```json
 [
   {
@@ -34,9 +34,10 @@ For a local repository the repository.json looks like:
 ]
 ```
 
+TODO: provide more information about the format of repositories.json
+
 In the root of the project you have a repositories.json file used by the test applications.
 
-TODO: provide more information about the format of repositories.json
 
 Each repository has metadata stored in a `plugins.json` file.
 ```json
@@ -70,7 +71,7 @@ TODO: provide more information about the format of plugins.json
 
 In the downloads folder you have a repository (plugins.json and artifacts - plugins archives) used by the test applications.
 
-For more information please see the test sources (UpdateTest, ...).
+For more information please see the test sources (UpdateTest, ...). It's a good idea to run these tests and to see the results.
 
 License
 --------------
