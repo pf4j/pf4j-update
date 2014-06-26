@@ -4,7 +4,7 @@ The goal of this project is to supply an update mechanism for [PF4J](https://git
 
 Components
 -------------------
-- **UpdateManager** allows to interrogates the plugins (local, remote) repositories for updates, available (new) plugins. Also this class allow you to install available plugins, update or uninstall existing plugins.
+- **UpdateManager** allows you to inspect the repositories (local, remote) for updates, available (new) plugins. Also this class allows you to install available plugins, update or uninstall existing plugins.
 - **UpdateRepository** defines a local/remote repository
 - **PluginInfo** defines the plugin information for each repository's plugin
 - **PluginRelease** defines a plugin release
@@ -78,13 +78,12 @@ public boolean hasUpdates();
 public List<UpdateRepository.PluginInfo> getPlugins();
 public List<UpdateRepository> getRepositories();
 ```
-
 and methods for plugin handling
- ```java
- public boolean installPlugin(String url);
- public boolean updatePlugin(String id, String url);
- public boolean uninstallPlugin(String id);
- ```
+```java
+public boolean installPlugin(String url);
+public boolean updatePlugin(String id, String url);
+public boolean uninstallPlugin(String id);
+```
 
 UpdateManager can work with multiple repositories (local and remote). All repositories are defined in a `repositories.json` file.
 
@@ -94,7 +93,7 @@ Bellow I defined two repository: localhost and folder.
   {
     "id": "localhost",
     "url": "http://localhost:8081/"
-  }
+  },
   {
     "id": folder",
     "url": "file:/home/decebal/work/pf4j-update/downloads/"
@@ -151,7 +150,7 @@ Bellow I registered two plugins: welcome-plugin and hello-plugin.
 
 Each plugin registered in `plugins.json` has an unique id, a description, a (display) name, the provider name,
 a project url, and a list with releases. New properties may appear in the future.  
-The _id_ field is mandatory. Also the _releases_ field must contains at least one element.  
+The **id** field is mandatory. Also the **releases** field must contains at least one element.  
 The last (current) release of the plugin is calculated taking into account by the _version_ property. In our example,
 the last release for each plugin is the release with version _0.8.0_.
 
