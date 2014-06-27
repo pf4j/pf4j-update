@@ -1,6 +1,7 @@
 PF4J - Update
 =====================
-The goal of this project is to supply an update mechanism for [PF4J](https://github.com/decebals/pf4j).
+The goal of this project is to supply an update mechanism for [PF4J](https://github.com/decebals/pf4j).  
+It's an open source (Apache license) lightweight (around 15KB) extension for PF4J, with minimal dependencies (only pf4j and gson).
 
 Components
 -------------------
