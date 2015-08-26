@@ -12,11 +12,11 @@
  */
 package ro.fortsoft.pf4j.update;
 
+import com.github.zafarkhaja.semver.Version;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.fortsoft.pf4j.Version;
 
 import java.io.File;
 import java.io.FileReader;
@@ -116,12 +116,12 @@ public class UpdateRepository {
             if (!readLastRelease) {
                 Date date = new Date(0);
                 for (PluginRelease release : releases) {
-                    Version requires = Version.ZERO;
+                    Version requires = Version.forIntegers(0, 0, 0);
                     if ((release.requires != null) && !release.requires.isEmpty()) {
-                        requires = Version.createVersion(release.requires);
+                        requires = Version.valueOf(release.requires);
                     }
 
-                    if (systemVersion.isZero() || systemVersion.atLeast(requires)) {
+                    if (systemVersion.equals(Version.forIntegers(0, 0, 0)) || systemVersion.greaterThanOrEqualTo(requires)) {
                         if (release.date.after(date)) {
                             lastRelease = release;
                             date = release.date;
@@ -136,7 +136,7 @@ public class UpdateRepository {
         }
 
         public boolean hasUpdate(Version systemVersion, Version installedVersion) {
-            return Version.createVersion(getLastRelease(systemVersion).version).exceeds(installedVersion);
+            return Version.valueOf(getLastRelease(systemVersion).version).greaterThan(installedVersion);
         }
 
     }
@@ -152,7 +152,7 @@ public class UpdateRepository {
 
         @Override
         public int compareTo(PluginRelease o) {
-            return Version.createVersion(version).compareTo(Version.createVersion(o.version));
+            return Version.valueOf(version).compareTo(Version.valueOf(o.version));
         }
 
     }

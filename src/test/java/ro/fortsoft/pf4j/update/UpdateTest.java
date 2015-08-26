@@ -12,11 +12,11 @@
  */
 package ro.fortsoft.pf4j.update;
 
+import com.github.zafarkhaja.semver.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
-import ro.fortsoft.pf4j.Version;
 
 import java.util.List;
 
