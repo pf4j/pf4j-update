@@ -96,7 +96,7 @@ Bellow I defined two repository: localhost and folder.
     "url": "http://localhost:8081/"
   },
   {
-    "id": folder",
+    "id": "folder",
     "url": "file:/home/decebal/work/pf4j-update/downloads/"
   }  
 ]
