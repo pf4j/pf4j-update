@@ -1,5 +1,8 @@
 PF4J - Update
 =====================
+[![Travis CI Build Status](https://travis-ci.org/decebals/pf4j-update.png)](https://travis-ci.org/decebals/pf4j-update)
+[![Maven Central](http://img.shields.io/maven-central/v/ro.fortsoft.pf4j/pf4j-update.svg)](http://search.maven.org/#search|ga|1|pf4j-update)
+
 The goal of this project is to supply an update mechanism for [PF4J](https://github.com/decebals/pf4j).  
 It's an open source (Apache license) lightweight (around 15KB) extension for PF4J, with minimal dependencies (only pf4j and gson).
 
