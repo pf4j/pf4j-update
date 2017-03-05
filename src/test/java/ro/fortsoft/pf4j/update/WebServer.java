@@ -23,7 +23,7 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
 /**
- * @author Deceball Suiu
+ * @author Decebal Suiu
  */
 public class WebServer {
 

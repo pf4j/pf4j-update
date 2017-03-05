@@ -51,7 +51,7 @@ public class UpdateManager {
     }
 
     public List<UpdateRepository.PluginInfo> getAvailablePlugins() {
-        List<UpdateRepository.PluginInfo> availablePlugins = new ArrayList<UpdateRepository.PluginInfo>();
+        List<UpdateRepository.PluginInfo> availablePlugins = new ArrayList<>();
         List<UpdateRepository.PluginInfo> plugins = getPlugins();
         for (UpdateRepository.PluginInfo plugin : plugins) {
             if (pluginManager.getPlugin(plugin.id) == null) {
@@ -74,7 +74,7 @@ public class UpdateManager {
     }
 
     public List<UpdateRepository.PluginInfo> getUpdates() {
-        List<UpdateRepository.PluginInfo> updates = new ArrayList<UpdateRepository.PluginInfo>();
+        List<UpdateRepository.PluginInfo> updates = new ArrayList<>();
         List<UpdateRepository.PluginInfo> plugins = getPlugins();
         for (UpdateRepository.PluginInfo plugin : plugins) {
             PluginWrapper installedPlugin = pluginManager.getPlugin(plugin.id);
@@ -105,7 +105,7 @@ public class UpdateManager {
     }
 
     public List<UpdateRepository.PluginInfo> getPlugins() {
-        List<UpdateRepository.PluginInfo> plugins = new ArrayList<UpdateRepository.PluginInfo>();
+        List<UpdateRepository.PluginInfo> plugins = new ArrayList<>();
         List<UpdateRepository> repositories = getRepositories();
         for (UpdateRepository repository : repositories) {
             plugins.addAll(repository.getPlugins());
@@ -165,7 +165,7 @@ public class UpdateManager {
     }
 
     private synchronized void initRepositories() {
-        FileReader reader = null;
+        FileReader reader;
         try {
             log.debug("Read repositories from '{}'", repositoriesFile);
             reader = new FileReader(repositoriesFile);

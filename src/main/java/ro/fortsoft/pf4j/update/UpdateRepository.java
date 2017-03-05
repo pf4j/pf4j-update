@@ -103,8 +103,6 @@ public class UpdateRepository {
 
     public static class PluginInfo implements Serializable {
 
-        private static final long serialVersionUID = 1L;
-
         public String id;
         public String name;
         public String description;
@@ -145,8 +143,6 @@ public class UpdateRepository {
     }
 
     public static class PluginRelease implements Serializable, Comparable<PluginRelease> {
-
-        private static final long serialVersionUID = 1L;
 
         public String version;
         public Date date;

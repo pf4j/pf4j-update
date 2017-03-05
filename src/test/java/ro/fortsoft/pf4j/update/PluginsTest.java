@@ -42,7 +42,7 @@ public class PluginsTest {
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        List<UpdateRepository.PluginInfo> plugins = new ArrayList<UpdateRepository.PluginInfo>();
+        List<UpdateRepository.PluginInfo> plugins = new ArrayList<>();
 
         // plugin 1
         UpdateRepository.PluginInfo p1 = new UpdateRepository.PluginInfo();
