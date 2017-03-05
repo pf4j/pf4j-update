@@ -132,7 +132,7 @@ public class UpdateManager {
             return false;
         }
 
-        String pluginId = pluginManager.loadPlugin(pluginArchiveFile);
+        String pluginId = pluginManager.loadPlugin(pluginArchiveFile.toPath());
         PluginState state = pluginManager.startPlugin(pluginId);
 
         return PluginState.STARTED.equals(state);
@@ -151,7 +151,7 @@ public class UpdateManager {
             return false;
         }
 
-        String newPluginId = pluginManager.loadPlugin(pluginArchiveFile);
+        String newPluginId = pluginManager.loadPlugin(pluginArchiveFile.toPath());
         PluginState state = pluginManager.startPlugin(newPluginId);
 
         return PluginState.STARTED.equals(state);
