@@ -140,6 +140,19 @@ public class UpdateRepository {
             return Version.valueOf(getLastRelease(systemVersion).version).greaterThan(installedVersion);
         }
 
+        @Override
+        public String toString() {
+            return "PluginInfo{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", provider='" + provider + '\'' +
+                ", projectUrl='" + projectUrl + '\'' +
+                ", releases=" + releases +
+                ", readLastRelease=" + readLastRelease +
+                ", lastRelease=" + lastRelease +
+                '}';
+        }
     }
 
     public static class PluginRelease implements Serializable, Comparable<PluginRelease> {
@@ -154,6 +167,15 @@ public class UpdateRepository {
             return Version.valueOf(version).compareTo(Version.valueOf(o.version));
         }
 
+        @Override
+        public String toString() {
+            return "PluginRelease{" +
+                "version='" + version + '\'' +
+                ", date=" + date +
+                ", requires='" + requires + '\'' +
+                ", url='" + url + '\'' +
+                '}';
+        }
     }
 
 }

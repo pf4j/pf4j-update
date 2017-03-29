@@ -17,6 +17,7 @@ package ro.fortsoft.pf4j.update;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.net.www.protocol.file.FileURLConnection;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -59,14 +60,21 @@ class FileDownloader {
         // connect to the remote site (may takes some time)
         connection.connect();
 
-        // check for http authorization
-        HttpURLConnection httpConnection = (HttpURLConnection) connection;
-        if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
-            throw new ConnectException("HTTP Authorization failure");
-        }
+        long lastModified = 0;
 
-        // try to get the server-specified last-modified date of this artifact
-        long lastModified = httpConnection.getHeaderFieldDate("Last-Modified", System.currentTimeMillis());
+        if (connection instanceof HttpURLConnection) {
+            // check for http authorization
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            if (httpConnection.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                throw new ConnectException("HTTP Authorization failure");
+            }
+
+            // try to get the server-specified last-modified date of this artifact
+            lastModified = httpConnection.getHeaderFieldDate("Last-Modified", System.currentTimeMillis());
+        } else if (connection instanceof FileURLConnection) {
+            FileURLConnection fileConnection = (FileURLConnection) connection;
+            lastModified = fileConnection.getLastModified();
+        }
 
         // try to get the input stream (three times)
         InputStream is = null;
