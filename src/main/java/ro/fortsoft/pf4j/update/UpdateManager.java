@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,14 +42,29 @@ public class UpdateManager {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateManager.class);
 
-    private static final String repositoriesFile = "repositories.json";
+    private Path repositoriesJson;
 
-    private List<UpdateRepository> repositories;
+    protected List<UpdateRepository> repositories;
 
     public PluginManager pluginManager;
 
     public UpdateManager(PluginManager pluginManager) {
         this.pluginManager = pluginManager;
+        repositoriesJson = Paths.get("repositories.json");
+    }
+
+    public UpdateManager(PluginManager pluginManager, Path repositoriesJson) {
+        this(pluginManager);
+        this.repositoriesJson = repositoriesJson;
+    }
+
+    public UpdateManager(PluginManager pluginManager, List<UpdateRepository> repos) {
+        this(pluginManager);
+        if (repos == null) {
+            throw new RuntimeException("Failed to init UpdateManager, repos cannot be null");
+        } else {
+            repositories = repos;
+        }
     }
 
     public List<UpdateRepository.PluginInfo> getAvailablePlugins() {
@@ -115,8 +132,8 @@ public class UpdateManager {
     }
 
     public List<UpdateRepository> getRepositories() {
-        if (repositories == null) {
-            initRepositories();
+        if (repositories == null && repositoriesJson != null) {
+            initRepositoriesFromJson();
         }
 
         return repositories;
@@ -164,11 +181,11 @@ public class UpdateManager {
         return pluginManager.deletePlugin(id);
     }
 
-    private synchronized void initRepositories() {
+    protected synchronized void initRepositoriesFromJson() {
         FileReader reader;
         try {
-            log.debug("Read repositories from '{}'", repositoriesFile);
-            reader = new FileReader(repositoriesFile);
+            log.debug("Read repositories from '{}'", repositoriesJson);
+            reader = new FileReader(repositoriesJson.toFile());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             repositories = Collections.emptyList();
