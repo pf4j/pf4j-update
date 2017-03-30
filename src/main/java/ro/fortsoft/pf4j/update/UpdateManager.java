@@ -42,7 +42,7 @@ public class UpdateManager {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateManager.class);
 
-    private static Path repositoriesJson;
+    private Path repositoriesJson;
 
     protected List<UpdateRepository> repositories;
 
@@ -55,7 +55,7 @@ public class UpdateManager {
 
     public UpdateManager(PluginManager pluginManager, Path repositoriesJson) {
         this(pluginManager);
-        UpdateManager.repositoriesJson = repositoriesJson;
+        this.repositoriesJson = repositoriesJson;
     }
 
     public UpdateManager(PluginManager pluginManager, List<UpdateRepository> repos) {
@@ -133,7 +133,7 @@ public class UpdateManager {
 
     public List<UpdateRepository> getRepositories() {
         if (repositories == null && repositoriesJson != null) {
-            initRepositoriesFronJson();
+            initRepositoriesFromJson();
         }
 
         return repositories;
@@ -181,7 +181,7 @@ public class UpdateManager {
         return pluginManager.deletePlugin(id);
     }
 
-    protected synchronized void initRepositoriesFronJson() {
+    protected synchronized void initRepositoriesFromJson() {
         FileReader reader;
         try {
             log.debug("Read repositories from '{}'", repositoriesJson);
