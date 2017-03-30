@@ -79,7 +79,7 @@ public class UpdateRepository {
     private void initPlugins() {
         Reader pluginsJsonReader;
         try {
-            URL pluginsUrl = (new URI(url)).resolve(pluginsJson).toURL();
+            URL pluginsUrl = new URL(new URL(url), pluginsJson);
             log.debug("Read plugins of '{}' repository from '{}'", id, pluginsUrl);
             pluginsJsonReader = new InputStreamReader(pluginsUrl.openStream());
         } catch (Exception e) {
