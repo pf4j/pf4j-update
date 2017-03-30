@@ -21,10 +21,11 @@ import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -76,20 +77,19 @@ public class UpdateRepository {
     }
 
     private void initPlugins() {
-        FileReader reader;
+        Reader pluginsJsonReader;
         try {
-            String pluginsUrl = url + pluginsJson;
+            URL pluginsUrl = (new URI(url)).resolve(pluginsJson).toURL();
             log.debug("Read plugins of '{}' repository from '{}'", id, pluginsUrl);
-            File pluginsFile = new FileDownloader().downloadFile(pluginsUrl);
-            reader = new FileReader(pluginsFile);
-        } catch (IOException e) {
+            pluginsJsonReader = new InputStreamReader(pluginsUrl.openStream());
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             plugins = Collections.emptyList();
             return;
         }
 
         Gson gson = new GsonBuilder().create();
-        PluginInfo[] items = gson.fromJson(reader, PluginInfo[].class);
+        PluginInfo[] items = gson.fromJson(pluginsJsonReader, PluginInfo[].class);
         plugins = Arrays.asList(items);
         log.debug("Found {} plugins in repository '{}'", plugins.size(), id);
 
