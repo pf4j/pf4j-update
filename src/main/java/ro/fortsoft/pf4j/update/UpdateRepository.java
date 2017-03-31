@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
-import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +37,7 @@ public class UpdateRepository {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateRepository.class);
 
-    private static final String pluginsJson = "plugins.json";
+    private static final String DEFAULT_PLUGINS_JSON = "plugins.json";
 
     private String id;
     private String url;
@@ -79,7 +78,7 @@ public class UpdateRepository {
     private void initPlugins() {
         Reader pluginsJsonReader;
         try {
-            URL pluginsUrl = new URL(new URL(url), pluginsJson);
+            URL pluginsUrl = new URL(new URL(url), DEFAULT_PLUGINS_JSON);
             log.debug("Read plugins of '{}' repository from '{}'", id, pluginsUrl);
             pluginsJsonReader = new InputStreamReader(pluginsUrl.openStream());
         } catch (Exception e) {
