@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginState;
 import ro.fortsoft.pf4j.PluginWrapper;
+import ro.fortsoft.pf4j.update.UpdateRepository.PluginInfo;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,10 +31,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Decebal Suiu
@@ -60,17 +58,13 @@ public class UpdateManager {
 
     public UpdateManager(PluginManager pluginManager, List<UpdateRepository> repos) {
         this(pluginManager);
-        if (repos == null) {
-            throw new RuntimeException("Failed to init UpdateManager, repos cannot be null");
-        } else {
-            repositories = repos;
-        }
+        repositories = repos == null ? new ArrayList<UpdateRepository>() : repos;
     }
 
-    public List<UpdateRepository.PluginInfo> getAvailablePlugins() {
-        List<UpdateRepository.PluginInfo> availablePlugins = new ArrayList<>();
-        List<UpdateRepository.PluginInfo> plugins = getPlugins();
-        for (UpdateRepository.PluginInfo plugin : plugins) {
+    public List<PluginInfo> getAvailablePlugins() {
+        List<PluginInfo> availablePlugins = new ArrayList<>();
+        List<PluginInfo> plugins = getPlugins();
+        for (PluginInfo plugin : plugins) {
             if (pluginManager.getPlugin(plugin.id) == null) {
                 availablePlugins.add(plugin);
             }
@@ -80,8 +74,8 @@ public class UpdateManager {
     }
 
     public boolean hasAvailablePlugins() {
-        List<UpdateRepository.PluginInfo> plugins = getPlugins();
-        for (UpdateRepository.PluginInfo plugin : plugins) {
+        List<PluginInfo> plugins = getPlugins();
+        for (PluginInfo plugin : plugins) {
             if (pluginManager.getPlugin(plugin.id) == null) {
                 return true;
             }
@@ -90,15 +84,19 @@ public class UpdateManager {
         return false;
     }
 
-    public List<UpdateRepository.PluginInfo> getUpdates() {
-        List<UpdateRepository.PluginInfo> updates = new ArrayList<>();
-        List<UpdateRepository.PluginInfo> plugins = getPlugins();
-        for (UpdateRepository.PluginInfo plugin : plugins) {
-            PluginWrapper installedPlugin = pluginManager.getPlugin(plugin.id);
-            if (installedPlugin != null) {
-                Version installedVersion = installedPlugin.getDescriptor().getVersion();
-                if (plugin.hasUpdate(getSystemVersion(), installedVersion)) {
-                    updates.add(plugin);
+    /**
+     * Return a list of plugins that are newer versions of already installed plugins
+     * @return
+     */
+    public List<PluginInfo> getUpdates() {
+        List<PluginInfo> updates = new ArrayList<>();
+        Map<String, PluginInfo> pluginMap = getPluginsMap();
+        for (PluginWrapper installed : pluginManager.getPlugins()) {
+            PluginInfo pluginFromRepo = pluginMap.get(installed.getPluginId());
+            if (pluginFromRepo != null) {
+                Version installedVersion = installed.getDescriptor().getVersion();
+                if (pluginFromRepo.hasUpdate(getSystemVersion(), installedVersion)) {
+                    updates.add(pluginFromRepo);
                 }
             }
         }
@@ -106,23 +104,20 @@ public class UpdateManager {
         return updates;
     }
 
+    /**
+     * Checks if Update Repositories has newer versions of some of the installed plugins
+     * @return true if updates exist
+     */
     public boolean hasUpdates() {
-        List<UpdateRepository.PluginInfo> plugins = getPlugins();
-        for (UpdateRepository.PluginInfo plugin : plugins) {
-            PluginWrapper installedPlugin = pluginManager.getPlugin(plugin.id);
-            if (installedPlugin != null) {
-                Version installedVersion = installedPlugin.getDescriptor().getVersion();
-                if (plugin.hasUpdate(getSystemVersion(), installedVersion)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return getUpdates().size() > 0;
     }
 
-    public List<UpdateRepository.PluginInfo> getPlugins() {
-        List<UpdateRepository.PluginInfo> plugins = new ArrayList<>();
+    /**
+     * Get the list of plugins from all repos
+     * @return List of plugin info
+     */
+    public List<PluginInfo> getPlugins() {
+        List<PluginInfo> plugins = new ArrayList<>();
         List<UpdateRepository> repositories = getRepositories();
         for (UpdateRepository repository : repositories) {
             plugins.addAll(repository.getPlugins());
@@ -131,16 +126,39 @@ public class UpdateManager {
         return plugins;
     }
 
+    /**
+     * Get a map of all plugins from all repos where key is plugin id
+     * @return List of plugin info
+     */
+    public Map<String, PluginInfo> getPluginsMap() {
+        Map<String, PluginInfo> pluginsMap = new HashMap<>();
+        for (PluginInfo plugin : getPlugins()) {
+            pluginsMap.put(plugin.id, plugin);
+        }
+        return pluginsMap;
+    }
+
     public List<UpdateRepository> getRepositories() {
         if (repositories == null && repositoriesJson != null) {
-            initRepositoriesFromJson();
+            refresh();
         }
 
         return repositories;
     }
 
+    public void setRepositories(List<UpdateRepository> repositories) {
+        this.repositories = repositories;
+        refresh();
+    }
+
+
     public synchronized void refresh() {
-        repositories = null;
+        if (repositoriesJson != null) {
+            initRepositoriesFromJson();
+        }
+        for (UpdateRepository updateRepository : repositories) {
+            updateRepository.refresh();
+        }
     }
 
     public synchronized boolean installPlugin(String url) {
