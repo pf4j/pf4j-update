@@ -100,6 +100,13 @@ public class UpdateRepository {
         }
     }
 
+    /**
+     * Causes plugins.json to be read again to look for new updates from repos
+     */
+    public void refresh() {
+        plugins = null;
+    }
+
     public static class PluginInfo implements Serializable {
 
         public String id;
@@ -136,7 +143,8 @@ public class UpdateRepository {
         }
 
         public boolean hasUpdate(Version systemVersion, Version installedVersion) {
-            return Version.valueOf(getLastRelease(systemVersion).version).greaterThan(installedVersion);
+            PluginRelease last = getLastRelease(systemVersion);
+            return last != null && Version.valueOf(last.version).greaterThan(installedVersion);
         }
 
     }
