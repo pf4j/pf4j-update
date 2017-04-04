@@ -114,7 +114,7 @@ For more information please see the test sources (UpdateTest, ...). It's a good 
 Repository structure
 -------------------
 Each repository exposes multiple plugins using a `plugins.json` file.  
-Bellow I registered two plugins: _welcome-plugin_ and _hello-plugin_.
+Below I registered two plugins: _welcome-plugin_ and _hello-plugin_.
 ```json
 [
   {
@@ -152,17 +152,41 @@ Bellow I registered two plugins: _welcome-plugin_ and _hello-plugin_.
 ]
 ```
 
-Each plugin registered in `plugins.json` has an unique id, a description, a (display) name, the provider name,
-a project url, and a list with releases. New properties may appear in the future.  
-The **id** field is mandatory. Also the **releases** field must contains at least one element.  
-The last (current) release of the plugin is calculated taking into account by the _version_ property. In our example,
-the last release for each plugin is the release with version _0.8.0_.  
-The **url** value (from plugins.json) for each release is relative to the repository's url but the value for **UpdateRepository.PluginRelease.url** is absolute.   
-For plugin1 example:  
-`"url": "http://localhost:8081/"` (repositories.json)  
-`"url": "pf4j-demo-plugin2/0.8.0/pf4j-demo-plugin2-0.8.0.zip"` (plugins.json)  
-and the `UpdateRepository.PluginRelease.url` value for release 0.8.0 of plugin1 is   `http://localhost:8081/pf4j-demo-plugin2/0.8.0/pf4j-demo-plugin2-0.8.0.zip`  
-NOTE: Don't forget to put */* to the end of url values from repositories.json.  
+### plugins.json
+**Fields per plugin**
+
+|Property    |Format       |Description                        |
+|------------|-------------|-----------------------------------|
+|id          |string       |Unique id, mandatory               |
+|name        |string       |Display name (short)               |
+|description |string       |Describe your plugin               |
+|provider    |string       |Name of plugin provider            |
+|releases    |List         |List of releases (minimum one)     |
+
+**Fields per release**
+
+|Property    |Format       |Description                        |
+|------------|-------------|-----------------------------------|
+|version     |X.Y.Z        |Version of release ([SemVer](http://semver.org/) format) |
+|date        |date         |Release date, parsable format      |
+|requires    |Expression   |[SemVer expression](https://github.com/zafarkhaja/jsemver#semver-expressions-api-ranges), e.g. ">=2.0.0"  |
+|url         |URL-string   |Link to zip, either absolute or relative URL |
+
+
+New properties may appear in the future.
+
+The last (current) release of the plugin is calculated taking into account
+by the _version_ property. In our example, the last release for each
+plugin is the release with version _0.9.0_.
+
+**NOTE**: The `requires` property was a simple X.Y.Z string in versions
+up to 0.3.0, interpreted as `>=X.Y.Z`. You may want to update your old
+`plugins.json` files to the new syntax.
+
+### Example for 'hello-plugin' (plugin2):
+URL from `repositories.json`: `http://localhost:8081/`
+Relative URL in `plugins.json`: `pf4j-demo-plugin2/0.8.0/pf4j-demo-plugin2-0.8.0.zip`
+Resulting `UpdateRepository.PluginRelease.url`: `http://localhost:8081/pf4j-demo-plugin2/0.8.0/pf4j-demo-plugin2-0.8.0.zip`
 
 In the _downloads_ folder of the project you have a repository (plugins.json and artifacts - plugins archives) used by the test applications.
 The structure of the repository is:

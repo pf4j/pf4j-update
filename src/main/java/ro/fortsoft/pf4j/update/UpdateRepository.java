@@ -16,6 +16,8 @@
 package ro.fortsoft.pf4j.update;
 
 import com.github.zafarkhaja.semver.Version;
+import com.github.zafarkhaja.semver.expr.Expression;
+import com.github.zafarkhaja.semver.expr.ExpressionParser;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
@@ -25,10 +27,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Decebal Suiu
@@ -116,32 +115,38 @@ public class UpdateRepository {
         public String projectUrl;
         public List<PluginRelease> releases;
 
-        private boolean readLastRelease;
-        private PluginRelease lastRelease;
+        // Cache lastRelease per system version
+        private Map<Version, PluginRelease> lastRelease = new HashMap<>();
 
+        /**
+         * Returns the last release version of this plugin for given system version, regardless of release date
+         * @param systemVersion version of host system where plugin will be installed
+         * @return PluginRelease which has the highest version number
+         */
         public PluginRelease getLastRelease(Version systemVersion) {
-            if (!readLastRelease) {
-                Date date = new Date(0);
+            if (!lastRelease.containsKey(systemVersion)) {
                 for (PluginRelease release : releases) {
-                    Version requires = Version.forIntegers(0, 0, 0);
-                    if ((release.requires != null) && !release.requires.isEmpty()) {
-                        requires = Version.valueOf(release.requires);
-                    }
+                    Expression requires = release.getRequiresExpression();
 
-                    if (systemVersion.equals(Version.forIntegers(0, 0, 0)) || systemVersion.greaterThanOrEqualTo(requires)) {
-                        if (release.date.after(date)) {
-                            lastRelease = release;
-                            date = release.date;
+                    if (systemVersion.equals(Version.forIntegers(0, 0, 0)) || systemVersion.satisfies(requires)) {
+                        if (lastRelease.get(systemVersion) == null) {
+                            lastRelease.put(systemVersion, release);
+                        } else if (release.compareTo(lastRelease.get(systemVersion)) > 0) {
+                            lastRelease.put(systemVersion, release);
                         }
                     }
                 }
-
-                readLastRelease = true;
             }
 
-            return lastRelease;
+            return lastRelease.get(systemVersion);
         }
 
+        /**
+         * Finds whether the repo has a newer version of the plugin
+         * @param systemVersion version of host system where plugin will be installed
+         * @param installedVersion version that is already installed
+         * @return true if there is a newer version available which is compatible with system
+         */
         public boolean hasUpdate(Version systemVersion, Version installedVersion) {
             PluginRelease last = getLastRelease(systemVersion);
             return last != null && Version.valueOf(last.version).greaterThan(installedVersion);
@@ -161,6 +166,13 @@ public class UpdateRepository {
             return Version.valueOf(version).compareTo(Version.valueOf(o.version));
         }
 
+        /**
+         * Get the required version as a SemVer Expression
+         * @return Expression object that can be compared to a Version. If requires is empty, a wildcard version is returned
+         */
+        public Expression getRequiresExpression() {
+            return ExpressionParser.newInstance().parse(requires == null ? "*" : requires);
+        }
     }
 
 }
