@@ -18,8 +18,7 @@ package ro.fortsoft.pf4j.update;
 import com.github.zafarkhaja.semver.Version;
 import org.junit.Before;
 import org.junit.Test;
-import ro.fortsoft.pf4j.update.UpdateRepository.PluginInfo;
-import ro.fortsoft.pf4j.update.UpdateRepository.PluginRelease;
+import ro.fortsoft.pf4j.update.PluginInfo.PluginRelease;
 
 import java.util.Arrays;
 
@@ -30,6 +29,7 @@ import static org.junit.Assert.*;
  */
 public class PluginInfoTest {
     private PluginInfo pi1;
+    private PluginInfo pi2;
 
     @Before
     public void setup() {
@@ -45,6 +45,16 @@ public class PluginInfoTest {
         pi1r3.version = "1.2.0";
         pi1r3.requires = ">2.5 & < 4";
         pi1.releases = Arrays.asList(pi1r1, pi1r2, pi1r3);
+        pi2 = new PluginInfo();
+        PluginRelease pi2r1 = new PluginRelease();
+        pi2r1.version = "1.0.0";
+        pi2.id = "aaa";
+        pi2.releases = Arrays.asList(pi2r1);
+    }
+
+    @Test
+    public void comparePluginInfo() {
+        assertTrue(pi1.compareTo(pi2) > 0);
     }
 
     @Test

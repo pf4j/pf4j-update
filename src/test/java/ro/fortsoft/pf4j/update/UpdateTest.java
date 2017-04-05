@@ -59,11 +59,11 @@ public class UpdateTest {
 
         // check for updates
         if (updateManager.hasUpdates()) {
-            List<UpdateRepository.PluginInfo> updates = updateManager.getUpdates();
+            List<PluginInfo> updates = updateManager.getUpdates();
             log.debug("Found {} updates", updates.size());
-            for (UpdateRepository.PluginInfo plugin : updates) {
+            for (PluginInfo plugin : updates) {
                 log.debug("Found update for plugin '{}'", plugin.id);
-                UpdateRepository.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
+                PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
                 String lastVersion = lastRelease.version;
                 String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion().toString();
                 log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
@@ -81,11 +81,11 @@ public class UpdateTest {
 
         // check for available (new) plugins
         if (updateManager.hasAvailablePlugins()) {
-            List<UpdateRepository.PluginInfo> availablePlugins = updateManager.getAvailablePlugins();
+            List<PluginInfo> availablePlugins = updateManager.getAvailablePlugins();
             log.debug("Found {} available plugins", availablePlugins.size());
-            for (UpdateRepository.PluginInfo plugin : availablePlugins) {
+            for (PluginInfo plugin : availablePlugins) {
                 log.debug("Found available plugin '{}'", plugin.id);
-                UpdateRepository.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
+                PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
                 String lastVersion = lastRelease.version;
                 log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
                 boolean installed = updateManager.installPlugin(lastRelease.url);

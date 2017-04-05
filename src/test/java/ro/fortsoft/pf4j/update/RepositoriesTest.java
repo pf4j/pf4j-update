@@ -42,7 +42,7 @@ public class RepositoriesTest {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         List<UpdateRepository> repositories = new ArrayList<UpdateRepository>();
 //        repositories.add(new UpdateRepository("local", "file:/home/decebal_suiu/work/pf4j-update/plugins/"));
-        repositories.add(new UpdateRepository("localhost", "http://localhost:8081/"));
+        repositories.add(new DefaultUpdateRepository("localhost", "http://localhost:8081/"));
 //        repositories.add(new UpdateRepository("localhost2", "http://localhost:8088/"));
 //        repositories.add(new UpdateRepository("localhost3", "http://localhost:8888/"));
 
