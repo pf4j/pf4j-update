@@ -20,15 +20,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.fortsoft.pf4j.PluginManager;
-import ro.fortsoft.pf4j.PluginState;
-import ro.fortsoft.pf4j.PluginWrapper;
-import ro.fortsoft.pf4j.update.UpdateRepository.PluginInfo;
+import ro.fortsoft.pf4j.*;
+import ro.fortsoft.pf4j.update.PluginInfo.PluginRelease;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.net.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -63,8 +60,7 @@ public class UpdateManager {
 
     public List<PluginInfo> getAvailablePlugins() {
         List<PluginInfo> availablePlugins = new ArrayList<>();
-        List<PluginInfo> plugins = getPlugins();
-        for (PluginInfo plugin : plugins) {
+        for (PluginInfo plugin : getPlugins()) {
             if (pluginManager.getPlugin(plugin.id) == null) {
                 availablePlugins.add(plugin);
             }
@@ -74,8 +70,7 @@ public class UpdateManager {
     }
 
     public boolean hasAvailablePlugins() {
-        List<PluginInfo> plugins = getPlugins();
-        for (PluginInfo plugin : plugins) {
+        for (PluginInfo plugin : getPlugins()) {
             if (pluginManager.getPlugin(plugin.id) == null) {
                 return true;
             }
@@ -117,13 +112,9 @@ public class UpdateManager {
      * @return List of plugin info
      */
     public List<PluginInfo> getPlugins() {
-        List<PluginInfo> plugins = new ArrayList<>();
-        List<UpdateRepository> repositories = getRepositories();
-        for (UpdateRepository repository : repositories) {
-            plugins.addAll(repository.getPlugins());
-        }
-
-        return plugins;
+        List<PluginInfo> list = new ArrayList<>(getPluginsMap().values());
+        Collections.sort(list);
+        return list;
     }
 
     /**
@@ -132,9 +123,10 @@ public class UpdateManager {
      */
     public Map<String, PluginInfo> getPluginsMap() {
         Map<String, PluginInfo> pluginsMap = new HashMap<>();
-        for (PluginInfo plugin : getPlugins()) {
-            pluginsMap.put(plugin.id, plugin);
+        for (UpdateRepository repository : getRepositories()) {
+            pluginsMap.putAll(repository.getPlugins());
         }
+
         return pluginsMap;
     }
 
@@ -146,12 +138,61 @@ public class UpdateManager {
         return repositories;
     }
 
+
+    /**
+     * Replace all repositories
+     * @param repositories list of new repositories
+     */
     public void setRepositories(List<UpdateRepository> repositories) {
         this.repositories = repositories;
         refresh();
     }
 
+    /**
+     * Add one DefaultUpdateRepository
+     * @param id of repo
+     * @param url of repo
+     */
+    public void addRepository(String id, String url) {
+        for (UpdateRepository ur : repositories) {
+            if (ur.getId().equals(id)) {
+                throw new RuntimeException("Repository with id " + id + " already exists");
+            }
+        }
+        repositories.add(new DefaultUpdateRepository(id, url));
+    }
 
+    /**
+     * Add a repo that was created by client
+     * @param newRepo
+     */
+    public void addRepository(UpdateRepository newRepo) {
+        for (UpdateRepository ur : repositories) {
+            if (ur.getId().equals(newRepo.getId())) {
+                throw new RuntimeException("Repository with id " + newRepo.getId() + " already exists");
+            }
+        }
+        newRepo.refresh();
+        repositories.add(newRepo);
+    }
+
+    /**
+     * Remove a repository by id
+     * @param id of repository to remove
+     */
+    public void removeRepository(String id) {
+      for (UpdateRepository repo : getRepositories()) {
+        if (id == repo.getId()) {
+          repositories.remove(repo);
+          break;
+        }
+      }
+      log.warn("Repository with id " + id + " not found, doing nothing");
+    }
+
+    /**
+     * Refreshes all repositories, so they are forced to refresh list of plugins
+     */
     public synchronized void refresh() {
         if (repositoriesJson != null) {
             initRepositoriesFromJson();
@@ -161,38 +202,136 @@ public class UpdateManager {
         }
     }
 
-    public synchronized boolean installPlugin(String url) {
-        File pluginArchiveFile;
+    /**
+     * Installs a plugin given only its URL
+     * @param url the url of the plugin to install
+     * @return true if plugin was installed
+     * @deprecated - use the installPlugin(id, version) instead
+     */
+    public boolean installPlugin(String url) {
+        FileDownloader downloader = new SimpleFileDownloader();
         try {
-            pluginArchiveFile = new FileDownloader().downloadFile(url);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return false;
+            Path downloaded = downloader.downloadFile(new URL(url));
+
+            // TODO: Add getPluginsRoot to interface PluginManager
+            Path pluginsRoot = ((AbstractPluginManager)pluginManager).getPluginsRoot();
+            Path file = pluginsRoot.resolve(downloaded.getFileName());
+            Files.move(downloaded, file);
+
+            String newPluginId = pluginManager.loadPlugin(file);
+            PluginState state = pluginManager.startPlugin(newPluginId);
+
+            return PluginState.STARTED.equals(state);
+        } catch (Exception e) {
+            log.error("Plugin at " + url + " not installed.", e);
         }
+        return false;
+    }
 
-        String pluginId = pluginManager.loadPlugin(pluginArchiveFile.toPath());
-        PluginState state = pluginManager.startPlugin(pluginId);
+    /**
+     * Installs a plugin by URL
+     * @param id the id of plugin to install
+     * @param version the version of plugin to install, on SemVer format
+     * @return true if installation successful and plugin started
+     */
+    public synchronized boolean installPlugin(String id, String version) {
+        Path downloaded = null;
+        try {
+            // Download to temporary location
+            downloaded = downloadPlugin(id, version);
+            // TODO: Add getPluginsRoot to interface PluginManager
+            Path pluginsRoot = ((AbstractPluginManager)pluginManager).getPluginsRoot();
+            Path file = pluginsRoot.resolve(downloaded.getFileName());
+            Files.move(downloaded, file);
 
-        return PluginState.STARTED.equals(state);
+            String pluginId = pluginManager.loadPlugin(file);
+            PluginState state = pluginManager.startPlugin(pluginId);
+
+            return PluginState.STARTED.equals(state);
+        } catch (Exception e) {
+            log.error("Plugin " + id + "@" + version + " not installed.", e);
+        }
+        return false;
+    }
+
+    /**
+     * Downloads a plugin with given coordinates and returns a path to the file
+     * @param id of plugin
+     * @param version of plugin
+     * @return Path to file which will reside in a temporary folder in the system default temp area
+     * @throws PluginException if download failed
+     */
+    protected Path downloadPlugin(String id, String version) throws PluginException {
+        try {
+            URL url = findUrlForPlugin(id, version);
+            return getFileDownloader(id).downloadFile(url);
+        } catch (IOException e) {
+            throw new PluginException("Error during download of plugin " + id, e);
+        }
+    }
+
+    /**
+     * Finds the FileDownloader to use for this repository
+     * @param pluginId the plugin we wish to download
+     * @return FileDownloader instance
+     */
+    protected FileDownloader getFileDownloader(String pluginId) {
+        for (UpdateRepository ur : repositories) {
+            if (ur.getPlugin(pluginId) != null && ur.getFileDownloader() != null) {
+                return ur.getFileDownloader();
+            }
+        }
+        return new SimpleFileDownloader();
+    }
+
+    /**
+     * Resolves url from id and version
+     * @param id of plugin
+     * @param version of plugin
+     * @return URL for downloading
+     * @throws PluginException if id or version does not exist
+     */
+    protected URL findUrlForPlugin(String id, String version) throws PluginException {
+        PluginInfo plugin = getPluginsMap().get(id);
+        if (plugin == null) {
+            log.info("Plugin with id {} does not exist in any repository", id);
+            throw new PluginException("Plugin with id " + id + " not found in any repository");
+        }
+        for (PluginRelease release : plugin.releases) {
+            if (Version.valueOf(version).equals(Version.valueOf(release.version)) && release.url != null) {
+                try {
+                    return new URL(release.url);
+                } catch (MalformedURLException e) {
+                    throw new PluginException("Release URL " + release.url + " is not a valid URL", e);
+                }
+            }
+        }
+        throw new PluginException("Plugin " + id + " with version @" + version + " does not exist in the repository");
     }
 
     public boolean updatePlugin(String id, String url) {
-        File pluginArchiveFile;
         try {
-            pluginArchiveFile = new FileDownloader().downloadFile(url);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            return false;
+            // Download to temp folder
+            Path downloaded = getFileDownloader(id).downloadFile(new URL(url));
+
+            if (!pluginManager.deletePlugin(id)) {
+                return false;
+            }
+
+            // TODO: Add getPluginsRoot to interface PluginManager
+            Path pluginsRoot = ((AbstractPluginManager)pluginManager).getPluginsRoot();
+            Path file = pluginsRoot.resolve(downloaded.getFileName());
+            Files.move(downloaded, file);
+
+            String newPluginId = pluginManager.loadPlugin(file);
+            PluginState state = pluginManager.startPlugin(newPluginId);
+
+            return PluginState.STARTED.equals(state);
+
+        } catch (Exception e) {
+            log.error("Error while updating plugin " + id, e);
         }
-
-        if (!pluginManager.deletePlugin(id)) {
-            return false;
-        }
-
-        String newPluginId = pluginManager.loadPlugin(pluginArchiveFile.toPath());
-        PluginState state = pluginManager.startPlugin(newPluginId);
-
-        return PluginState.STARTED.equals(state);
+        return false;
     }
 
     public boolean uninstallPlugin(String id) {
@@ -211,7 +350,7 @@ public class UpdateManager {
         }
 
         Gson gson = new GsonBuilder().create();
-        UpdateRepository[] items = gson.fromJson(reader, UpdateRepository[].class);
+        UpdateRepository[] items = gson.fromJson(reader, DefaultUpdateRepository[].class);
 
         repositories = Arrays.asList(items);
     }
