@@ -112,7 +112,7 @@ public class UpdateManager {
      * @return List of plugin info
      */
     public List<PluginInfo> getPlugins() {
-        ArrayList<PluginInfo> list = new ArrayList<>(getPluginsMap().values());
+        List<PluginInfo> list = new ArrayList<>(getPluginsMap().values());
         Collections.sort(list);
         return list;
     }
