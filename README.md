@@ -9,9 +9,10 @@ It's an open source (Apache license) lightweight (around 15KB) extension for PF4
 Components
 -------------------
 - **UpdateManager** allows you to inspect the repositories (local, remote) for updates, available (new) plugins. Also this class allows you to install available plugins, update or uninstall existing plugins.
-- **UpdateRepository** defines a local/remote repository
+- **UpdateRepository** defines a local/remote repository (pluggable)
 - **PluginInfo** defines the plugin information for each repository's plugin
 - **PluginRelease** defines a plugin release
+- **FileDownloader** defines a pluggable way of downloading from a repository
 
 Using Maven
 -------------------
@@ -39,13 +40,14 @@ public static void main(String[] args) {
     
     // create plugin manager
     PluginManager pluginManager = new DefaultPluginManager();
-    pluginManager.loadPlugins();
-    
-    // create update manager
-    UpdateManager updateManager = new UpdateManager(pluginManager);
 
     // >> keep system up-to-date <<
-    Version systemVersion = pluginManager.getSystemVersion();
+    Version systemVersion = Version.valueOf("1.2.3");
+    pluginManager.setSystemVersion(systemVersion);
+    pluginManager.loadPlugins();
+
+    // create update manager
+    UpdateManager updateManager = new UpdateManager(pluginManager);
 
     // check for updates
     if (updateManager.hasUpdates()) {
@@ -89,9 +91,11 @@ public boolean updatePlugin(String id, String url);
 public boolean uninstallPlugin(String id);
 ```
 
-UpdateManager can work with multiple repositories (local and remote). All repositories are defined in a `repositories.json` file.
+UpdateManager can work with multiple repositories (local and remote).
+All repositories are either defined in a `repositories.json` file or
+provided in UpdateManager's constructor.
 
-Bellow I defined two repository: localhost and folder.
+Below I defined two repository: localhost and folder.
 ```json
 [
   {
@@ -105,11 +109,30 @@ Bellow I defined two repository: localhost and folder.
 ]
 ```
 
-Each repository defined in `repositories.json` has an unique id and an url.  
+Each repository has an unique id and an url.
 
-In the root of the project you have a repositories.json file used by the test applications.  
+In the root of this project you have a `repositories.json` file used by
+the test applications.
 
-For more information please see the test sources (UpdateTest, ...). It's a good idea to run these tests and to see the results.
+For more information please see the test sources (UpdateTest, ...).
+It's a good idea to run these tests and to see the results.
+
+Customization
+-------------
+The project is made for customization and extension to your own needs. Here are some
+examples:
+
+### Tailor repository loading
+First you can supply to `UpdateManager` your custom location and name
+of `repositories.json` if you want it to live somewhere else.
+
+If you need even more control, `UpdateManager` accepts repositories in
+constructor and through setters.
+Implement your own UpdateRepository implementation and FileDownloaders to handle
+your own custom repsitory structures, authentication, checksum verifications etc.
+
+### Subclass UpdateManager
+For full control, subclass `UpdateManager` and override relevant methods.
 
 Repository structure
 -------------------
@@ -173,7 +196,7 @@ Below I registered two plugins: _welcome-plugin_ and _hello-plugin_.
 |url         |URL-string   |Link to zip, either absolute or relative URL |
 
 
-New properties may appear in the future.
+*New properties may appear in the future.*
 
 The last (current) release of the plugin is calculated taking into account
 by the _version_ property. In our example, the last release for each
