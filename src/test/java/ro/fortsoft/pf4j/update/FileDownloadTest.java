@@ -17,6 +17,7 @@ package ro.fortsoft.pf4j.update;
 
 import org.junit.Before;
 import org.junit.Test;
+import ro.fortsoft.pf4j.PluginException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -67,5 +68,10 @@ public class FileDownloadTest {
         assertTrue(Files.exists(downloaded));
         // File attributes are copied
         assertEquals(downloadUrl.openConnection().getLastModified(), downloaded.toFile().lastModified());
+    }
+
+    @Test(expected = PluginException.class)
+    public void unsupportedProtocol() throws Exception {
+        downloader.downloadFile(new URL("jar:file:!/myfile.jar"));
     }
 }
