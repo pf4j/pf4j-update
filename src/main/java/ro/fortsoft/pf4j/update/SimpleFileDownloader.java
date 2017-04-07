@@ -22,12 +22,8 @@ import ro.fortsoft.pf4j.PluginException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.net.*;
+import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 
 /**
@@ -39,15 +35,65 @@ public class SimpleFileDownloader implements FileDownloader {
 
     private static final Logger log = LoggerFactory.getLogger(SimpleFileDownloader.class);
 
+    /**
+     * Downloads a file. If HTTP(S) or FTP, stream content, if local file:/ do a simple filesystem copy to tmp folder.
+     * Other protocols not supported.
+     * @param fileUrl the URI representing the file to download
+     * @return the path of downloaded/copied file
+     * @throws IOException in case of network or IO problems
+     * @throws PluginException in case of other problems
+     */
     public Path downloadFile(URL fileUrl) throws PluginException, IOException {
+        switch (fileUrl.getProtocol()) {
+            case "http":
+            case "https":
+            case "ftp":
+                return downloadFileHttp(fileUrl);
+
+            case "file":
+                return copyLocalFile(fileUrl);
+
+            default:
+                throw new PluginException("URL protocol " + fileUrl.getProtocol() + " not supported.");
+        }
+    }
+
+    /**
+     * Efficient copy of file in case of local file system
+     * @param fileUrl source file
+     * @return path of target file
+     * @throws IOException if problems during copy
+     * @throws PluginException in case of other problems
+     */
+    protected Path copyLocalFile(URL fileUrl) throws IOException, PluginException {
         Path destination = Files.createTempDirectory("pf4j-update-downloader");
         destination.toFile().deleteOnExit();
 
-        // create a temporary file
-        Path tmpFile = destination.resolve(DigestUtils.getSHA1(fileUrl.toString()) + ".tmp");
-        Files.deleteIfExists(tmpFile);
+        try {
+            Path fromFile = Paths.get(fileUrl.toURI());
+            String path = fileUrl.getPath();
+            String fileName = path.substring(path.lastIndexOf('/') + 1);
+            Path toFile = destination.resolve(fileName);
+            Files.copy(fromFile, toFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+            return toFile;
+        } catch (URISyntaxException e) {
+            throw new PluginException("Something wrong with given URL", e);
+        }
+    }
 
-        log.debug("Download '{}' to '{}'", fileUrl, tmpFile);
+    /**
+     * Downloads file from HTTP or FTP
+     * @param fileUrl source file
+     * @return path of downloaded file
+     * @throws IOException if problems
+     */
+    protected Path downloadFileHttp(URL fileUrl) throws IOException, PluginException {
+        Path destination = Files.createTempDirectory("pf4j-update-downloader");
+        destination.toFile().deleteOnExit();
+
+        String path = fileUrl.getPath();
+        String fileName = path.substring(path.lastIndexOf('/') + 1);
+        Path file = destination.resolve(fileName);
 
         // set up the URL connection
         URLConnection connection = fileUrl.openConnection();
@@ -75,11 +121,11 @@ public class SimpleFileDownloader implements FileDownloader {
             }
         }
         if (is == null) {
-            throw new ConnectException("Can't get '" + fileUrl + " to '" + tmpFile + "'");
+            throw new ConnectException("Can't get '" + fileUrl + " to '" + file + "'");
         }
 
         // reade from remote resource and write to the local file
-        FileOutputStream fos = new FileOutputStream(tmpFile.toFile());
+        FileOutputStream fos = new FileOutputStream(file.toFile());
         byte[] buffer = new byte[1024];
         int length;
         while ((length = is.read(buffer)) >= 0) {
@@ -87,14 +133,6 @@ public class SimpleFileDownloader implements FileDownloader {
         }
         fos.close();
         is.close();
-
-        // rename tmp file to resource file
-        String path = fileUrl.getPath();
-        String fileName = path.substring(path.lastIndexOf('/') + 1);
-        Path file = destination.resolve(fileName);
-        Files.deleteIfExists(file);
-        log.debug("Rename '{}' to {}", tmpFile, file);
-        Files.move(tmpFile, file);
 
         log.debug("Set last modified of '{}' to '{}'", file, lastModified);
         Files.setLastModifiedTime(file, FileTime.fromMillis(lastModified));

@@ -26,11 +26,13 @@ import java.nio.file.Path;
  */
 public interface FileDownloader {
     /**
-     * Downloads a file to destination. The implementation should download to a temporary folder
-     * @param fileUrl the file to download
+     * Downloads a file to destination. The implementation should download to a temporary folder.
+     * Implementations may choose to support different protocols such as http, https, ftp, file...
+     * The path returned must be of temporary nature and will most probably be moved/deleted by consumer
+     * @param fileUrl the URI representing the file to download
      * @return Path of downloaded file, typically in a temporary folder
      * @throws IOException if there was an IO problem during download
-     * @throws PluginException if file could be downloaded but there were other problems
+     * @throws PluginException in case of other problems, such as unsupported protocol
      */
     public Path downloadFile(URL fileUrl) throws PluginException, IOException;
 }
