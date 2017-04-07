@@ -19,10 +19,10 @@ import com.github.zafarkhaja.semver.Version;
 import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import ro.fortsoft.pf4j.PluginDescriptor;
 import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 import ro.fortsoft.pf4j.update.util.PropertiesPluginManager;
+import ro.fortsoft.pf4j.TestPluginDescriptor;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -130,7 +130,7 @@ public class InstallAndDownloadTest {
         private final Path propsFile;
         private final URI fileURI;
         public String zipname;
-        public PluginDescriptor descriptor;
+        public TestPluginDescriptor descriptor;
 
         public MockZipPlugin(String id, String version, String filename, String zipname) throws IOException {
             this.id = id;
@@ -143,7 +143,7 @@ public class InstallAndDownloadTest {
             propsFile = downloadRepoDir.resolve("my.properties");
             fileURI = URI.create("jar:file:"+ updateRepoZipFile.toString());
 
-            descriptor = new PluginDescriptor();
+            descriptor = new TestPluginDescriptor();
             descriptor.setPluginId(id);
             descriptor.setPluginVersion(Version.valueOf(version));
         }
@@ -156,7 +156,7 @@ public class InstallAndDownloadTest {
                 br.newLine();
                 br.write("plugin.version=" + version);
                 br.newLine();
-                br.write("plugin.class=ro.fortsoft.pf4j.update.util.TestPlugin");
+                br.write("plugin.class=ro.fortsoft.pf4j.update.util.NopPlugin");
                 br.close();
                 Files.move(propsFile, propsInZip);
             }
