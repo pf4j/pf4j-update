@@ -213,8 +213,7 @@ public class UpdateManager {
         try {
             Path downloaded = downloader.downloadFile(new URL(url));
 
-            // TODO: Add getPluginsRoot to interface PluginManager
-            Path pluginsRoot = ((AbstractPluginManager)pluginManager).getPluginsRoot();
+            Path pluginsRoot = pluginManager.getPluginsRoot();
             Path file = pluginsRoot.resolve(downloaded.getFileName());
             Files.move(downloaded, file);
 
@@ -239,8 +238,8 @@ public class UpdateManager {
         try {
             // Download to temporary location
             downloaded = downloadPlugin(id, version);
-            // TODO: Add getPluginsRoot to interface PluginManager
-            Path pluginsRoot = ((AbstractPluginManager)pluginManager).getPluginsRoot();
+
+            Path pluginsRoot = pluginManager.getPluginsRoot();
             Path file = pluginsRoot.resolve(downloaded.getFileName());
             Files.move(downloaded, file);
 
@@ -318,8 +317,7 @@ public class UpdateManager {
                 return false;
             }
 
-            // TODO: Add getPluginsRoot to interface PluginManager
-            Path pluginsRoot = ((AbstractPluginManager)pluginManager).getPluginsRoot();
+            Path pluginsRoot = pluginManager.getPluginsRoot();
             Path file = pluginsRoot.resolve(downloaded.getFileName());
             Files.move(downloaded, file);
 
