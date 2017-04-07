@@ -56,8 +56,9 @@ public class TestPluginDescriptor extends PluginDescriptor {
         super.setDependencies(dependencies);
     }
 
-    @Override
-    public void setLicense(String license) {
-        super.setLicense(license);
-    }
+// TODO: Wait with this until pf4j release
+//    @Override
+//    public void setLicense(String license) {
+//        super.setLicense(license);
+//    }
 }
