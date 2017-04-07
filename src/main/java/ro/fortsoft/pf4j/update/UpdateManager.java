@@ -228,7 +228,7 @@ public class UpdateManager {
     }
 
     /**
-     * Installs a plugin by URL
+     * Installs a plugin by id and version
      * @param id the id of plugin to install
      * @param version the version of plugin to install, on SemVer format
      * @return true if installation successful and plugin started

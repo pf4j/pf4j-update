@@ -40,6 +40,9 @@ public class DefaultUpdateRepository implements UpdateRepository {
 
     public DefaultUpdateRepository(String id, String url) {
         this.id = id;
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
         this.url = url;
     }
 
