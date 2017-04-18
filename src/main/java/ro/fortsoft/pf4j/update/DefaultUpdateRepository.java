@@ -32,7 +32,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
 
-    private static final String DEFAULT_PLUGINS_JSON = "plugins.json";
+    private String pluginsJsonFileName = "plugins.json";
 
     private String id;
     private String url;
@@ -44,6 +44,11 @@ public class DefaultUpdateRepository implements UpdateRepository {
             url += "/";
         }
         this.url = url;
+    }
+
+    public DefaultUpdateRepository(String id, String url, String pluginsJsonFileName) {
+        this(id, url);
+        this.pluginsJsonFileName = pluginsJsonFileName;
     }
 
     public String getId() {
@@ -70,7 +75,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     private void initPlugins() {
         Reader pluginsJsonReader;
         try {
-            URL pluginsUrl = new URL(new URL(url), DEFAULT_PLUGINS_JSON);
+            URL pluginsUrl = new URL(new URL(url), pluginsJsonFileName);
             log.debug("Read plugins of '{}' repository from '{}'", id, pluginsUrl);
             pluginsJsonReader = new InputStreamReader(pluginsUrl.openStream());
         } catch (Exception e) {
@@ -107,4 +112,15 @@ public class DefaultUpdateRepository implements UpdateRepository {
         return new SimpleFileDownloader();
     }
 
+    public String getPluginsJsonFileName() {
+        return pluginsJsonFileName;
+    }
+
+    /**
+     * Choose another file name than plugins.json
+     * @param pluginsJsonFileName the name (relative) of plugins.json file
+     */
+    public void setPluginsJsonFileName(String pluginsJsonFileName) {
+        this.pluginsJsonFileName = pluginsJsonFileName;
+    }
 }
