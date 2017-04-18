@@ -51,7 +51,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     }
 
     @Override
-    public String getLocation() {
+    public String getUrl() {
         return url;
     }
 

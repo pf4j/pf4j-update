@@ -27,9 +27,9 @@ public interface UpdateRepository {
     public String getId();
 
     /**
-     * @return the location of this repo as a String. Typically a URL
+     * @return the URL of this repo as a String
      */
-    public String getLocation();
+    public String getUrl();
 
     /**
      * Get all plugin descriptors for this repo
