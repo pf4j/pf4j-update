@@ -19,10 +19,13 @@ import org.junit.Before;
 import org.junit.Test;
 import ro.fortsoft.pf4j.PluginException;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import static org.junit.Assert.*;
 
@@ -30,10 +33,11 @@ import static org.junit.Assert.*;
  * Tests file download
  */
 public class FileDownloadTest {
-    private FileDownloader downloader;
+    private SimpleFileDownloader downloader;
     private WebServer webserver;
     private Path updateRepoDir;
     private Path repoFile;
+    private Path emptyFile;
 
     @Before
     public void setup() throws IOException {
@@ -42,6 +46,10 @@ public class FileDownloadTest {
         updateRepoDir = Files.createTempDirectory("repo");
         updateRepoDir.toFile().deleteOnExit();
         repoFile = Files.createFile(updateRepoDir.resolve("myfile"));
+        BufferedWriter writer = new BufferedWriter(Files.newBufferedWriter(repoFile, Charset.forName("utf-8"), StandardOpenOption.APPEND));
+        writer.write("test");
+        writer.close();
+        emptyFile = Files.createFile(updateRepoDir.resolve("emptyFile"));
     }
 
     @Test
@@ -66,6 +74,7 @@ public class FileDownloadTest {
         URL downloadUrl = new URL("http://localhost:55000/myfile");
         Path downloaded = downloader.downloadFile(downloadUrl);
         assertTrue(Files.exists(downloaded));
+        assertEquals(4, Files.size(downloaded));
         // File attributes are copied
         assertEquals(downloadUrl.openConnection().getLastModified(), downloaded.toFile().lastModified());
     }
@@ -73,5 +82,15 @@ public class FileDownloadTest {
     @Test(expected = PluginException.class)
     public void unsupportedProtocol() throws Exception {
         downloader.downloadFile(new URL("jar:file:!/myfile.jar"));
+    }
+
+    @Test(expected = PluginException.class)
+    public void emptyFileDownloaded() throws Exception {
+        downloader.validateDownload(null, emptyFile);
+    }
+
+    @Test(expected = PluginException.class)
+    public void notRegularFile() throws Exception {
+        downloader.validateDownload(null, updateRepoDir);
     }
 }
