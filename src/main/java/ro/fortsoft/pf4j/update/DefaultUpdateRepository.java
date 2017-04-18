@@ -118,7 +118,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
 
     /**
      * Choose another file name than plugins.json
-     * @param pluginsJsonFileName
+     * @param pluginsJsonFileName the name (relative) of plugins.json file
      */
     public void setPluginsJsonFileName(String pluginsJsonFileName) {
         this.pluginsJsonFileName = pluginsJsonFileName;
