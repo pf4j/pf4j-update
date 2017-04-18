@@ -86,7 +86,8 @@ public class SimpleFileDownloader implements FileDownloader {
      * Downloads file from HTTP or FTP
      * @param fileUrl source file
      * @return path of downloaded file
-     * @throws IOException if problems
+     * @throws IOException if IO problems
+     * @throws PluginException if validation fails or any other problems
      */
     protected Path downloadFileHttp(URL fileUrl) throws IOException, PluginException {
         Path destination = Files.createTempDirectory("pf4j-update-downloader");
@@ -143,7 +144,7 @@ public class SimpleFileDownloader implements FileDownloader {
     }
 
     /**
-     * Succeeds if downloaded file exists and has size > 0
+     * Succeeds if downloaded file exists and has size &gt; 0
      * <p>Override this method to provide your own validation rules such as content length matching or checksum checking etc</p>
      * @param originalUrl the source from which the file was downloaded
      * @param downloadedFile the path to the downloaded file
