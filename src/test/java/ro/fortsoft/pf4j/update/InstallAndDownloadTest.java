@@ -28,6 +28,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.*;
@@ -47,7 +48,7 @@ public class InstallAndDownloadTest {
     private PluginManager pluginManager;
     private UpdateManager updateManager;
     private Version systemVersion;
-    private String repoUrl;
+    private URL repoUrl;
     private List<PluginWrapper> installed;
 
     @Before
@@ -67,7 +68,7 @@ public class InstallAndDownloadTest {
         String jsonForPlugins = getJsonForPlugins(p1,p2,p3,p4);
         writer.write(jsonForPlugins);
         writer.close();
-        repoUrl = "file:" + downloadRepoDir.toAbsolutePath().toString() + "/";
+        repoUrl = new URL("file:" + downloadRepoDir.toAbsolutePath().toString() + "/");
         UpdateRepository local = new DefaultUpdateRepository("local", repoUrl);
         p1.create();
         p2.create();
@@ -100,7 +101,7 @@ public class InstallAndDownloadTest {
         assertTrue(updateManager.installPlugin("myPlugin", "1.2.3"));
         assertTrue(updateManager.hasUpdates());
         assertEquals(1, updateManager.getUpdates().size());
-        String p2url = updateManager.getUpdates().get(0).getLastRelease(systemVersion).url;
+        URL p2url = new URL(updateManager.getUpdates().get(0).getLastRelease(systemVersion).url);
         assertTrue(updateManager.updatePlugin("myPlugin", p2url));
         assertTrue(Files.exists(pluginFolderDir.resolve(p2.zipname)));
         assertTrue(Files.exists(pluginFolderDir.resolve(p2.pluginRepoUnzippedFolder)));

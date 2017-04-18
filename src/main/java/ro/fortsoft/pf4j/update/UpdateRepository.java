@@ -15,6 +15,7 @@
  */
 package ro.fortsoft.pf4j.update;
 
+import java.net.URL;
 import java.util.Map;
 
 /**
@@ -29,7 +30,7 @@ public interface UpdateRepository {
     /**
      * @return the URL of this repo as a String
      */
-    public String getUrl();
+    public URL getUrl();
 
     /**
      * Get all plugin descriptors for this repo

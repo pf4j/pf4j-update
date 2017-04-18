@@ -35,31 +35,30 @@ public class DefaultUpdateRepository implements UpdateRepository {
     private String pluginsJsonFileName = "plugins.json";
 
     private String id;
-    private String url;
+    private URL url;
     private Map<String, PluginInfo> plugins;
 
-    public DefaultUpdateRepository(String id, String url) {
+    public DefaultUpdateRepository(String id, URL url) {
         this.id = id;
-        if (!url.endsWith("/")) {
-            url += "/";
-        }
         this.url = url;
     }
 
-    public DefaultUpdateRepository(String id, String url, String pluginsJsonFileName) {
+    public DefaultUpdateRepository(String id, URL url, String pluginsJsonFileName) {
         this(id, url);
         this.pluginsJsonFileName = pluginsJsonFileName;
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
     @Override
-    public String getUrl() {
+    public URL getUrl() {
         return url;
     }
 
+    @Override
     public Map<String, PluginInfo> getPlugins() {
         if (plugins == null) {
             initPlugins();
@@ -68,6 +67,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
         return plugins;
     }
 
+    @Override
     public PluginInfo getPlugin(String id) {
         return getPlugins().get(id);
     }
@@ -75,7 +75,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     private void initPlugins() {
         Reader pluginsJsonReader;
         try {
-            URL pluginsUrl = new URL(new URL(url), pluginsJsonFileName);
+            URL pluginsUrl = new URL(url, pluginsJsonFileName);
             log.debug("Read plugins of '{}' repository from '{}'", id, pluginsUrl);
             pluginsJsonReader = new InputStreamReader(pluginsUrl.openStream());
         } catch (Exception e) {
@@ -90,7 +90,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
         for (PluginInfo p : items) {
             for (PluginRelease r : p.releases) {
                 try {
-                    r.url = new URL(new URL(url), r.url).toString();
+                    r.url = new URL(url, r.url).toString();
                 } catch (MalformedURLException e) {
                     log.warn("Skipping release {} of plugin {} due to failure to build valid absolute URL. Url was {}{}", r.version, p.id, url, r.url);
                 }
@@ -103,6 +103,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     /**
      * Causes plugins.json to be read again to look for new updates from repos
      */
+    @Override
     public void refresh() {
         plugins = null;
     }

@@ -20,6 +20,8 @@ import com.google.gson.GsonBuilder;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class RepositoriesTest {
 
     private static final String repositoriesFile = "repositories.json";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         FileWriter writer;
         try {
             writer = new FileWriter(repositoriesFile);
@@ -42,7 +44,7 @@ public class RepositoriesTest {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         List<UpdateRepository> repositories = new ArrayList<UpdateRepository>();
 //        repositories.add(new UpdateRepository("local", "file:/home/decebal_suiu/work/pf4j-update/plugins/"));
-        repositories.add(new DefaultUpdateRepository("localhost", "http://localhost:8081/"));
+        repositories.add(new DefaultUpdateRepository("localhost", new URL("http://localhost:8081/")));
 //        repositories.add(new UpdateRepository("localhost2", "http://localhost:8088/"));
 //        repositories.add(new UpdateRepository("localhost3", "http://localhost:8888/"));
 

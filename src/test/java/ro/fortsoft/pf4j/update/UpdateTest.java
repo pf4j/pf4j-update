@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -30,14 +31,12 @@ public class UpdateTest {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateTest.class);
 
-    private static final String repositoriesFile = "repositories.json";
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 //        createTestRepositories();
         update();
     }
 
-    private static void update() {
+    private static void update() throws Exception {
         // start the web server that serves the repository's artifacts
         try {
             new WebServer().start();
@@ -67,7 +66,7 @@ public class UpdateTest {
                 String lastVersion = lastRelease.version;
                 String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion().toString();
                 log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
-                boolean updated = updateManager.updatePlugin(plugin.id, lastRelease.url);
+                boolean updated = updateManager.updatePlugin(plugin.id, new URL(lastRelease.url));
                 if (updated) {
                     log.debug("Updated plugin '{}'", plugin.id);
                 } else {
@@ -88,7 +87,7 @@ public class UpdateTest {
                 PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
                 String lastVersion = lastRelease.version;
                 log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
-                boolean installed = updateManager.installPlugin(lastRelease.url);
+                boolean installed = updateManager.installPlugin(plugin.id, lastVersion);
                 if (installed) {
                     log.debug("Installed plugin '{}'", plugin.id);
                 } else {
