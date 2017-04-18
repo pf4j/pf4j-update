@@ -81,7 +81,7 @@ public class UpdateManager {
 
     /**
      * Return a list of plugins that are newer versions of already installed plugins
-     * @return
+     * @return list of plugins that have updates
      */
     public List<PluginInfo> getUpdates() {
         List<PluginInfo> updates = new ArrayList<>();
@@ -164,7 +164,7 @@ public class UpdateManager {
 
     /**
      * Add a repo that was created by client
-     * @param newRepo
+     * @param newRepo the new UpdateRepository to add to the list
      */
     public void addRepository(UpdateRepository newRepo) {
         for (UpdateRepository ur : repositories) {
