@@ -18,6 +18,8 @@ package ro.fortsoft.pf4j.update;
 import com.github.zafarkhaja.semver.Version;
 import com.github.zafarkhaja.semver.expr.Expression;
 import com.github.zafarkhaja.semver.expr.ExpressionParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -29,6 +31,7 @@ import java.util.Map;
  * PluginInfo describing a plugin from a repo
  */
 public class PluginInfo implements Serializable, Comparable<PluginInfo> {
+    private static final Logger log = LoggerFactory.getLogger(PluginInfo.class);
 
     public String id;
     public String name;
@@ -95,7 +98,12 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
          * @return Expression object that can be compared to a Version. If requires is empty, a wildcard version is returned
          */
         public Expression getRequiresExpression() {
-            return ExpressionParser.newInstance().parse(requires == null ? "*" : requires);
+            try {
+                return ExpressionParser.newInstance().parse(requires == null ? "*" : requires);
+            } catch (Exception e) {
+                log.warn("Failed to parse 'requires' expression {} for plugin {}. Allowing all versions", requires, url, e);
+                return ExpressionParser.newInstance().parse("*");
+            }
         }
     }
 }
