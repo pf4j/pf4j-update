@@ -75,7 +75,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     private void initPlugins() {
         Reader pluginsJsonReader;
         try {
-            URL pluginsUrl = new URL(url, pluginsJsonFileName);
+            URL pluginsUrl = new URL(getUrl(), pluginsJsonFileName);
             log.debug("Read plugins of '{}' repository from '{}'", id, pluginsUrl);
             pluginsJsonReader = new InputStreamReader(pluginsUrl.openStream());
         } catch (Exception e) {
@@ -90,9 +90,9 @@ public class DefaultUpdateRepository implements UpdateRepository {
         for (PluginInfo p : items) {
             for (PluginRelease r : p.releases) {
                 try {
-                    r.url = new URL(url, r.url).toString();
+                    r.url = new URL(getUrl(), r.url).toString();
                 } catch (MalformedURLException e) {
-                    log.warn("Skipping release {} of plugin {} due to failure to build valid absolute URL. Url was {}{}", r.version, p.id, url, r.url);
+                    log.warn("Skipping release {} of plugin {} due to failure to build valid absolute URL. Url was {}{}", r.version, p.id, getUrl(), r.url);
                 }
             }
             plugins.put(p.id, p);
