@@ -153,7 +153,7 @@ public class UpdateManager {
      * @param id of repo
      * @param url of repo
      */
-    public void addRepository(String id, String url) {
+    public void addRepository(String id, URL url) {
         for (UpdateRepository ur : repositories) {
             if (ur.getId().equals(id)) {
                 throw new RuntimeException("Repository with id " + id + " already exists");
@@ -200,31 +200,6 @@ public class UpdateManager {
         for (UpdateRepository updateRepository : repositories) {
             updateRepository.refresh();
         }
-    }
-
-    /**
-     * Installs a plugin given only its URL
-     * @param url the url of the plugin to install
-     * @return true if plugin was installed
-     * @deprecated - use the installPlugin(id, version) instead
-     */
-    public boolean installPlugin(String url) {
-        FileDownloader downloader = new SimpleFileDownloader();
-        try {
-            Path downloaded = downloader.downloadFile(new URL(url));
-
-            Path pluginsRoot = pluginManager.getPluginsRoot();
-            Path file = pluginsRoot.resolve(downloaded.getFileName());
-            Files.move(downloaded, file);
-
-            String newPluginId = pluginManager.loadPlugin(file);
-            PluginState state = pluginManager.startPlugin(newPluginId);
-
-            return PluginState.STARTED.equals(state);
-        } catch (Exception e) {
-            log.error("Plugin at " + url + " not installed.", e);
-        }
-        return false;
     }
 
     /**
@@ -308,10 +283,10 @@ public class UpdateManager {
         throw new PluginException("Plugin " + id + " with version @" + version + " does not exist in the repository");
     }
 
-    public boolean updatePlugin(String id, String url) {
+    public boolean updatePlugin(String id, URL url) {
         try {
             // Download to temp folder
-            Path downloaded = getFileDownloader(id).downloadFile(new URL(url));
+            Path downloaded = getFileDownloader(id).downloadFile(url);
 
             if (!pluginManager.deletePlugin(id)) {
                 return false;

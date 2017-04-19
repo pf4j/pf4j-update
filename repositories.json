@@ -1,5 +1,6 @@
 [
   {
+    "pluginsJsonFileName": "plugins.json",
     "id": "localhost",
     "url": "http://localhost:8081/"
   }
