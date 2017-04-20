@@ -19,6 +19,7 @@ import com.github.zafarkhaja.semver.Version;
 import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import ro.fortsoft.pf4j.PluginException;
 import ro.fortsoft.pf4j.PluginManager;
 import ro.fortsoft.pf4j.PluginWrapper;
 import ro.fortsoft.pf4j.update.util.PropertiesPluginManager;
@@ -101,12 +102,23 @@ public class InstallAndDownloadTest {
         assertTrue(updateManager.installPlugin("myPlugin", "1.2.3"));
         assertTrue(updateManager.hasUpdates());
         assertEquals(1, updateManager.getUpdates().size());
-        URL p2url = new URL(updateManager.getUpdates().get(0).getLastRelease(systemVersion).url);
-        assertTrue(updateManager.updatePlugin("myPlugin", p2url));
+        assertTrue(updateManager.updatePlugin("myPlugin", null)); // latest release
         assertTrue(Files.exists(pluginFolderDir.resolve(p2.zipname)));
         assertTrue(Files.exists(pluginFolderDir.resolve(p2.pluginRepoUnzippedFolder)));
         assertFalse(Files.exists(pluginFolderDir.resolve(p1.zipname)));
         assertFalse(Files.exists(pluginFolderDir.resolve(p1.pluginRepoUnzippedFolder)));
+    }
+
+    @Test(expected = PluginException.class)
+    public void updateVersionNotexist() throws Exception {
+        assertTrue(updateManager.installPlugin("myPlugin", "1.2.3"));
+        updateManager.updatePlugin("myPlugin", "9.9.9");
+    }
+
+    @Test
+    public void noUpdateAvailable() throws Exception {
+        assertTrue(updateManager.installPlugin("myPlugin", null)); // Install latest
+        assertFalse(updateManager.updatePlugin("myPlugin", null)); // Update to latest
     }
 
     @Test(expected = IllegalArgumentException.class)
