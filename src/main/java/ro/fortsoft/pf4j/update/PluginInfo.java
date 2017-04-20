@@ -31,6 +31,7 @@ import java.util.Map;
  * PluginInfo describing a plugin from a repo
  */
 public class PluginInfo implements Serializable, Comparable<PluginInfo> {
+
     private static final Logger log = LoggerFactory.getLogger(PluginInfo.class);
 
     public String id;
@@ -83,6 +84,7 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     }
 
     public static class PluginRelease implements Serializable, Comparable<PluginRelease> {
+
         public String version;
         public Date date;
         public String requires;
@@ -105,5 +107,7 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
                 return ExpressionParser.newInstance().parse("*");
             }
         }
+
     }
+
 }

@@ -22,33 +22,34 @@ import java.util.Map;
  * Contract for update repositories
  */
 public interface UpdateRepository {
+
     /**
      * @return the ID of this repo. This must be unique
      */
-    public String getId();
+    String getId();
 
     /**
      * @return the URL of this repo as a String
      */
-    public URL getUrl();
+    URL getUrl();
 
     /**
      * Get all plugin descriptors for this repo
      * @return Map of PluginId and PluginInfo
      */
-    public Map<String, PluginInfo> getPlugins();
+    Map<String, PluginInfo> getPlugins();
 
     /**
      * Get a particular plugin from this repo
      * @param id the id of the plugin
      * @return the PluginInfo
      */
-    public PluginInfo getPlugin(String id);
+    PluginInfo getPlugin(String id);
 
     /**
      * Flushes cached info to force re-fetching repository state on next get
      */
-    public void refresh();
+    void refresh();
 
     /**
      * Each repository has the option of overriding the download process.
@@ -57,4 +58,5 @@ public interface UpdateRepository {
      * @return the FileDownloader to use for this repository or null if you do not wish to override
      */
     FileDownloader getFileDownloader();
+
 }

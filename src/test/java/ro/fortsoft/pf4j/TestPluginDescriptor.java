@@ -18,9 +18,10 @@ package ro.fortsoft.pf4j;
 import com.github.zafarkhaja.semver.Version;
 
 /**
- * PluginDescriptor for testing, with public setters
+ * PluginDescriptor for testing, with public setters.
  */
 public class TestPluginDescriptor extends PluginDescriptor {
+
     @Override
     public void setPluginId(String pluginId) {
         super.setPluginId(pluginId);
@@ -56,9 +57,4 @@ public class TestPluginDescriptor extends PluginDescriptor {
         super.setDependencies(dependencies);
     }
 
-// TODO: Wait with this until pf4j release
-//    @Override
-//    public void setLicense(String license) {
-//        super.setLicense(license);
-//    }
 }

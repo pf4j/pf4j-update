@@ -25,6 +25,7 @@ import java.nio.file.Path;
  * Interface to download a file
  */
 public interface FileDownloader {
+
     /**
      * Downloads a file to destination. The implementation should download to a temporary folder.
      * Implementations may choose to support different protocols such as http, https, ftp, file...
@@ -35,4 +36,5 @@ public interface FileDownloader {
      * @throws PluginException in case of other problems, such as unsupported protocol
      */
     Path downloadFile(URL fileUrl) throws PluginException, IOException;
+
 }

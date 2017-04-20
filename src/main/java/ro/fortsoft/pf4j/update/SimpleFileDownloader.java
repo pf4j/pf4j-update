@@ -54,7 +54,7 @@ public class SimpleFileDownloader implements FileDownloader {
                 return copyLocalFile(fileUrl);
 
             default:
-                throw new PluginException("URL protocol " + fileUrl.getProtocol() + " not supported.");
+                throw new PluginException("URL protocol {} not supported", fileUrl.getProtocol());
         }
     }
 
@@ -156,6 +156,8 @@ public class SimpleFileDownloader implements FileDownloader {
                 return;
             }
         } catch (IOException e) { /* Fallthrough */ }
-        throw new PluginException("Failed downloading file " + downloadedFile);
+
+        throw new PluginException("Failed downloading file {}", downloadedFile);
     }
+
 }
