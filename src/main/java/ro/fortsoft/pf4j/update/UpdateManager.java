@@ -205,33 +205,34 @@ public class UpdateManager {
     /**
      * Installs a plugin by id and version
      * @param id the id of plugin to install
-     * @param version the version of plugin to install, on SemVer format
+     * @param version the version of plugin to install, on SemVer format, or null for latest
      * @return true if installation successful and plugin started
+     * @exception PluginException if plugin does not exist in repos or problems during
      */
-    public synchronized boolean installPlugin(String id, String version) {
+    public synchronized boolean installPlugin(String id, String version) throws PluginException {
         Path downloaded = null;
+
+        // Download to temporary location
+        downloaded = downloadPlugin(id, version);
+
+        Path pluginsRoot = pluginManager.getPluginsRoot();
+        Path file = pluginsRoot.resolve(downloaded.getFileName());
         try {
-            // Download to temporary location
-            downloaded = downloadPlugin(id, version);
-
-            Path pluginsRoot = pluginManager.getPluginsRoot();
-            Path file = pluginsRoot.resolve(downloaded.getFileName());
             Files.move(downloaded, file);
-
-            String pluginId = pluginManager.loadPlugin(file);
-            PluginState state = pluginManager.startPlugin(pluginId);
-
-            return PluginState.STARTED.equals(state);
-        } catch (Exception e) {
-            log.error("Plugin " + id + "@" + version + " not installed.", e);
+        } catch (IOException e) {
+            throw new PluginException("Failed to write file " + file + " to plugins folder");
         }
-        return false;
+
+        String pluginId = pluginManager.loadPlugin(file);
+        PluginState state = pluginManager.startPlugin(pluginId);
+
+        return PluginState.STARTED.equals(state);
     }
 
     /**
      * Downloads a plugin with given coordinates and returns a path to the file
      * @param id of plugin
-     * @param version of plugin
+     * @param version of plugin or null to download latest
      * @return Path to file which will reside in a temporary folder in the system default temp area
      * @throws PluginException if download failed
      */
@@ -261,7 +262,7 @@ public class UpdateManager {
     /**
      * Resolves url from id and version
      * @param id of plugin
-     * @param version of plugin
+     * @param version of plugin or null to locate latest version
      * @return URL for downloading
      * @throws PluginException if id or version does not exist
      */
@@ -271,40 +272,60 @@ public class UpdateManager {
             log.info("Plugin with id {} does not exist in any repository", id);
             throw new PluginException("Plugin with id " + id + " not found in any repository");
         }
-        for (PluginRelease release : plugin.releases) {
-            if (Version.valueOf(version).equals(Version.valueOf(release.version)) && release.url != null) {
-                try {
+        try {
+            if (version == null) {
+                return new URL(plugin.getLastRelease(getSystemVersion()).url);
+            }
+            for (PluginRelease release : plugin.releases) {
+                if (Version.valueOf(version).equals(Version.valueOf(release.version)) && release.url != null) {
                     return new URL(release.url);
-                } catch (MalformedURLException e) {
-                    throw new PluginException("Release URL " + release.url + " is not a valid URL", e);
                 }
             }
+        } catch (MalformedURLException e) {
+            throw new PluginException(e);
         }
         throw new PluginException("Plugin " + id + " with version @" + version + " does not exist in the repository");
     }
 
-    public boolean updatePlugin(String id, URL url) {
-        try {
-            // Download to temp folder
-            Path downloaded = getFileDownloader(id).downloadFile(url);
-
-            if (!pluginManager.deletePlugin(id)) {
-                return false;
-            }
-
-            Path pluginsRoot = pluginManager.getPluginsRoot();
-            Path file = pluginsRoot.resolve(downloaded.getFileName());
-            Files.move(downloaded, file);
-
-            String newPluginId = pluginManager.loadPlugin(file);
-            PluginState state = pluginManager.startPlugin(newPluginId);
-
-            return PluginState.STARTED.equals(state);
-
-        } catch (Exception e) {
-            log.error("Error while updating plugin " + id, e);
+    /**
+     * Updates a plugin id to given version or to latest version if version == null
+     * @param id the id of plugin to update
+     * @param version the version to update to, on SemVer format, or null for latest
+     * @return true if update successful
+     * @exception PluginException in case the given version is not available, plugin id not already installed etc
+    */
+    public boolean updatePlugin(String id, String version) throws PluginException {
+        if (pluginManager.getPlugin(id) == null) {
+            throw new PluginException("Plugin " + id + " cannot be updated since it is not installed");
         }
-        return false;
+        PluginInfo pi = getPluginsMap().get(id);
+        if (pi == null) {
+            throw new PluginException("Plugin " + id + " does not exist in any repository");
+        }
+        Version installedVersion = pluginManager.getPlugin(id).getDescriptor().getVersion();
+        if (!pi.hasUpdate(getSystemVersion(), installedVersion)) {
+            log.warn("Plugin {} does not have an update available which is compatible with system version", id, getSystemVersion());
+            return false;
+        }
+        // Download to temp folder
+        Path downloaded = downloadPlugin(id, version);
+
+        if (!pluginManager.deletePlugin(id)) {
+            return false;
+        }
+
+        Path pluginsRoot = pluginManager.getPluginsRoot();
+        Path file = pluginsRoot.resolve(downloaded.getFileName());
+        try {
+            Files.move(downloaded, file);
+        } catch (IOException e) {
+            throw new PluginException("Failed to write plugin file " + file + " to plugin folder");
+        }
+
+        String newPluginId = pluginManager.loadPlugin(file);
+        PluginState state = pluginManager.startPlugin(newPluginId);
+
+        return PluginState.STARTED.equals(state);
     }
 
     public boolean uninstallPlugin(String id) {

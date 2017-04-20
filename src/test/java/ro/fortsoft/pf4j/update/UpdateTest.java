@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import ro.fortsoft.pf4j.DefaultPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -66,7 +65,7 @@ public class UpdateTest {
                 String lastVersion = lastRelease.version;
                 String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion().toString();
                 log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
-                boolean updated = updateManager.updatePlugin(plugin.id, new URL(lastRelease.url));
+                boolean updated = updateManager.updatePlugin(plugin.id, lastVersion);
                 if (updated) {
                     log.debug("Updated plugin '{}'", plugin.id);
                 } else {
