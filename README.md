@@ -191,7 +191,7 @@ Below I registered two plugins: _welcome-plugin_ and _hello-plugin_.
 |Property    |Format       |Description                        |
 |------------|-------------|-----------------------------------|
 |version     |X.Y.Z        |Version of release ([SemVer](http://semver.org/) format) |
-|date        |date         |Release date, parsable format      |
+|date        |date         |Release date, ISO8601 or `yyyy-MM-dd` format |
 |requires    |Expression   |[SemVer expression](https://github.com/zafarkhaja/jsemver#semver-expressions-api-ranges), e.g. ">=2.0.0"  |
 |url         |URL-string   |Link to zip, either absolute or relative URL |
 
@@ -201,6 +201,10 @@ Below I registered two plugins: _welcome-plugin_ and _hello-plugin_.
 The last (current) release of the plugin is calculated taking into account
 by the _version_ property. In our example, the last release for each
 plugin is the release with version _0.9.0_.
+
+We encourage using `yyyy-MM-dd` format for release date. Localized US format
+as in the examples above will also work. If the date is not parsable, it
+will be set to epoch (1970-01-01) and print a warning in logs.
 
 **NOTE**: The `requires` property was a simple X.Y.Z string in versions
 up to 0.3.0, interpreted as `>=X.Y.Z`. You may want to update your old

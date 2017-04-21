@@ -32,6 +32,8 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -46,6 +48,7 @@ public class InstallAndDownloadTest {
     private MockZipPlugin p2;
     private MockZipPlugin p3;
     private MockZipPlugin p4;
+    private MockZipPlugin p5;
     private PluginManager pluginManager;
     private UpdateManager updateManager;
     private Version systemVersion;
@@ -57,16 +60,17 @@ public class InstallAndDownloadTest {
         downloadRepoDir = Files.createTempDirectory("pf4j-repo");
         downloadRepoDir.toFile().deleteOnExit();
         pluginFolderDir = Files.createTempDirectory("pf4j-plugins");
-        p1 = new MockZipPlugin("myPlugin", "1.2.3", "my-plugin-1.2.3", "my-plugin-1.2.3.zip");
+        p1 = new MockZipPlugin("myPlugin", "1.2.3", "my-plugin-1.2.3", "my-plugin-1.2.3.zip", "Mar 22, 2017 9:00:35 PM");
         p2 = new MockZipPlugin("myPlugin", "2.0.0", "my-plugin-2.0.0", "my-plugin-2.0.0.ZIP");
         p3 = new MockZipPlugin("other", "3.0.0", "other-3.0.0", "other-3.0.0.Zip");
-        p4 = new MockZipPlugin("other", "3.0.1", "other-3.0.1", "other-3.0.1.Zip");
+        p4 = new MockZipPlugin("other", "3.0.1", "other-3.0.1", "other-3.0.1.Zip", "2017-01-31T12:34:56Z");
+        p5 = new MockZipPlugin("wrongDate", "4.0.1", "wrong-4.0.1", "wrong-4.0.1.Zip", "wrong");
         pluginManager = new PropertiesPluginManager(pluginFolderDir);
         systemVersion = Version.forIntegers(1,8);
         pluginManager.setSystemVersion(systemVersion); // Only p2 and p3 are valid
         Path pluginsjson = downloadRepoDir.resolve("plugins.json");
         BufferedWriter writer = Files.newBufferedWriter(pluginsjson, Charset.defaultCharset(), StandardOpenOption.CREATE_NEW);
-        String jsonForPlugins = getJsonForPlugins(p1,p2,p3,p4);
+        String jsonForPlugins = getJsonForPlugins(p1,p2,p3,p4,p5);
         writer.write(jsonForPlugins);
         writer.close();
         repoUrl = new URL("file:" + downloadRepoDir.toAbsolutePath().toString() + "/");
@@ -74,15 +78,24 @@ public class InstallAndDownloadTest {
         p1.create();
         p2.create();
         p3.create();
+        p5.create();
         updateManager = new UpdateManager(pluginManager, Arrays.asList(local));
     }
 
     @Test
     public void findRightVersions() throws Exception {
         assertEquals(1, updateManager.repositories.size());
-        assertEquals(2, updateManager.getPlugins().size());
-        assertEquals("2.0.0", updateManager.getPlugins().get(0).getLastRelease(systemVersion).version);
-        assertEquals("3.0.1", updateManager.getPlugins().get(1).getLastRelease(systemVersion).version);
+        assertEquals(3, updateManager.getPlugins().size());
+        assertEquals("2.0.0", updateManager.getPluginsMap().get("myPlugin").getLastRelease(systemVersion).version);
+        assertEquals("3.0.1", updateManager.getPluginsMap().get("other").getLastRelease(systemVersion).version);
+    }
+
+    @Test
+    public void tolerantDateParsing() throws Exception {
+        assertEquals(dateFor("2016-12-31"), updateManager.getPluginsMap().get("myPlugin").getLastRelease(systemVersion).date);
+        assertTrue(updateManager.getPluginsMap().get("other").getLastRelease(systemVersion).date.after(dateFor("2017-01-31")));
+        assertTrue(updateManager.getPluginsMap().get("other").getLastRelease(systemVersion).date.before(dateFor("2017-02-01")));
+        assertEquals(dateFor("1970-01-01"), updateManager.getPluginsMap().get("wrongDate").getLastRelease(systemVersion).date);
     }
 
     @Test
@@ -141,6 +154,12 @@ public class InstallAndDownloadTest {
 
     // ****************** MOCK *********************
 
+    private Date dateFor(String date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf.parse(date);
+    }
+
     private class MockZipPlugin {
         public final String id;
         public final String version;
@@ -151,12 +170,14 @@ public class InstallAndDownloadTest {
         private final URI fileURI;
         public String zipname;
         public TestPluginDescriptor descriptor;
+        public String dateStr;
 
-        public MockZipPlugin(String id, String version, String filename, String zipname) throws IOException {
+        public MockZipPlugin(String id, String version, String filename, String zipname, String dateStr) throws IOException {
             this.id = id;
             this.version = version;
             this.filenameUnzipped = filename;
             this.zipname = zipname;
+            this.dateStr = dateStr;
 
             updateRepoZipFile = downloadRepoDir.resolve(zipname).toAbsolutePath();
             pluginRepoUnzippedFolder = pluginFolderDir.resolve(filename);
@@ -166,6 +187,10 @@ public class InstallAndDownloadTest {
             descriptor = new TestPluginDescriptor();
             descriptor.setPluginId(id);
             descriptor.setPluginVersion(Version.valueOf(version));
+        }
+
+        public MockZipPlugin(String id, String version, String filename, String zipname) throws IOException {
+            this(id, version, filename, zipname, "2016-12-31");
         }
 
         public void create() throws IOException {
@@ -205,6 +230,7 @@ public class InstallAndDownloadTest {
                 Map<String, String> releaseInfo = new HashMap<>();
                 releaseInfo.put("version", p.version);
                 releaseInfo.put("url", p.zipname);
+                releaseInfo.put("date", p.dateStr);
                 releases.add(releaseInfo);
             }
             info.put("releases", releases);
