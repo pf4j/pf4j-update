@@ -41,6 +41,9 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     public String projectUrl;
     public List<PluginRelease> releases;
 
+    // This is metadata added at parse time, not part of the published plugins.json
+    private String repositoryId;
+
     // Cache lastRelease per system version
     private Map<Version, PluginRelease> lastRelease = new HashMap<>();
 
@@ -68,7 +71,7 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     }
 
     /**
-     * Finds whether the repo has a newer version of the plugin
+     * Finds whether the  newer version of the plugin
      * @param systemVersion version of host system where plugin will be installed
      * @param installedVersion version that is already installed
      * @return true if there is a newer version available which is compatible with system
@@ -81,6 +84,14 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     @Override
     public int compareTo(PluginInfo o) {
         return id.compareTo(o.id);
+    }
+
+    public String getRepositoryId() {
+        return repositoryId;
+    }
+
+    public void setRepositoryId(String repositoryId) {
+        this.repositoryId = repositoryId;
     }
 
     public static class PluginRelease implements Serializable, Comparable<PluginRelease> {

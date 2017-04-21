@@ -132,6 +132,13 @@ public class InstallAndDownloadTest {
         assertTrue(updateManager.uninstallPlugin("other"));
     }
 
+    @Test
+    public void repositoryIdIsFilled() throws Exception {
+        for (PluginInfo info : updateManager.getAvailablePlugins()) {
+            assertEquals("local", info.getRepositoryId());
+        }
+    }
+
     // ****************** MOCK *********************
 
     private class MockZipPlugin {
