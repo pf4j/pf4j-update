@@ -15,14 +15,20 @@
  */
 package ro.fortsoft.pf4j.update;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ro.fortsoft.pf4j.update.PluginInfo.PluginRelease;
 
 import java.io.*;
 import java.net.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -84,13 +90,16 @@ public class DefaultUpdateRepository implements UpdateRepository {
             return;
         }
 
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new LenientDateTypeAdapter()).create();
         PluginInfo[] items = gson.fromJson(pluginsJsonReader, PluginInfo[].class);
         plugins = new HashMap<>(items.length);
         for (PluginInfo p : items) {
             for (PluginRelease r : p.releases) {
                 try {
                     r.url = new URL(getUrl(), r.url).toString();
+                    if (r.date.getTime() == 0) {
+                        log.warn("Illegal release date when parsing {}@{}, setting to epoch", p.id, r.version);
+                    }
                 } catch (MalformedURLException e) {
                     log.warn("Skipping release {} of plugin {} due to failure to build valid absolute URL. Url was {}{}", r.version, p.id, getUrl(), r.url);
                 }
@@ -125,4 +134,71 @@ public class DefaultUpdateRepository implements UpdateRepository {
     public void setPluginsJsonFileName(String pluginsJsonFileName) {
         this.pluginsJsonFileName = pluginsJsonFileName;
     }
+
+    /* Fork of com.google.gson.internal.bind.DateTypeAdapter */
+    private static class LenientDateTypeAdapter extends TypeAdapter<Date> {
+        public static final TypeAdapterFactory FACTORY = new TypeAdapterFactory() {
+          @SuppressWarnings("unchecked") // we use a runtime check to make sure the 'T's equal
+          public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+            return typeToken.getRawType() == Date.class ? (TypeAdapter<T>) new LenientDateTypeAdapter() : null;
+          }
+        };
+
+        private final DateFormat enUsFormat
+            = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Locale.US);
+        private final DateFormat localFormat
+            = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT);
+        private final DateFormat iso8601Format = buildIso8601Format();
+        private final DateFormat shortFormat = buildShortFormat();
+
+        private static DateFormat buildIso8601Format() {
+          DateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+          iso8601Format.setTimeZone(TimeZone.getTimeZone("UTC"));
+          return iso8601Format;
+        }
+
+        private static DateFormat buildShortFormat() {
+          DateFormat shortFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
+          shortFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+          return shortFormat;
+        }
+
+        @Override public Date read(JsonReader in) throws IOException {
+          if (in.peek() == JsonToken.NULL) {
+            in.nextNull();
+            return null;
+          }
+          return deserializeToDate(in.nextString());
+        }
+
+        private synchronized Date deserializeToDate(String json) {
+          try {
+            return localFormat.parse(json);
+          } catch (ParseException ignored) {
+          }
+          try {
+            return enUsFormat.parse(json);
+          } catch (ParseException ignored) {
+          }
+          try {
+            return iso8601Format.parse(json);
+          } catch (ParseException ignored) {
+          }
+          try {
+            return shortFormat.parse(json);
+          } catch (ParseException e) {
+            return new Date(0);
+          }
+        }
+
+        @Override public synchronized void write(JsonWriter out, Date value) throws IOException {
+          if (value == null) {
+            out.nullValue();
+            return;
+          }
+          String dateFormatAsString = enUsFormat.format(value);
+          out.value(dateFormatAsString);
+        }
+    }
+
 }
