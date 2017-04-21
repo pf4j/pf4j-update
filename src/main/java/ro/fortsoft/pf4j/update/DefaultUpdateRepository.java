@@ -95,6 +95,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
                     log.warn("Skipping release {} of plugin {} due to failure to build valid absolute URL. Url was {}{}", r.version, p.id, getUrl(), r.url);
                 }
             }
+            p.setRepositoryId(getId());
             plugins.put(p.id, p);
         }
         log.debug("Found {} plugins in repository '{}'", plugins.size(), id);
