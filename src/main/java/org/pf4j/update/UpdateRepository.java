@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
 import java.net.URL;
 import java.util.Map;

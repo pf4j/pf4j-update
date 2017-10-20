@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update.util;
+package org.pf4j.update.util;
 
-import ro.fortsoft.pf4j.DefaultPluginManager;
-import ro.fortsoft.pf4j.PluginDescriptorFinder;
-import ro.fortsoft.pf4j.PropertiesPluginDescriptorFinder;
+import org.pf4j.DefaultPluginManager;
+import org.pf4j.PluginDescriptorFinder;
+import org.pf4j.PropertiesPluginDescriptorFinder;
 
 import java.nio.file.Path;
 

@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
 import com.github.zafarkhaja.semver.Version;
 import com.github.zafarkhaja.semver.expr.Expression;
 import com.github.zafarkhaja.semver.expr.ExpressionParser;
+import org.pf4j.VersionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,19 +46,19 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     private String repositoryId;
 
     // Cache lastRelease per system version
-    private Map<Version, PluginRelease> lastRelease = new HashMap<>();
+    private Map<String, PluginRelease> lastRelease = new HashMap<>();
 
     /**
      * Returns the last release version of this plugin for given system version, regardless of release date
      * @param systemVersion version of host system where plugin will be installed
      * @return PluginRelease which has the highest version number
      */
-    public PluginRelease getLastRelease(Version systemVersion) {
+    public PluginRelease getLastRelease(String systemVersion, VersionManager versionManager) {
         if (!lastRelease.containsKey(systemVersion)) {
             for (PluginRelease release : releases) {
                 Expression requires = release.getRequiresExpression();
 
-                if (systemVersion.equals(Version.forIntegers(0, 0, 0)) || systemVersion.satisfies(requires)) {
+                if (systemVersion.equals("0.0.0") || versionManager.satisfies(requires, systemVersion)) {
                     if (lastRelease.get(systemVersion) == null) {
                         lastRelease.put(systemVersion, release);
                     } else if (release.compareTo(lastRelease.get(systemVersion)) > 0) {
@@ -76,9 +77,9 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
      * @param installedVersion version that is already installed
      * @return true if there is a newer version available which is compatible with system
      */
-    public boolean hasUpdate(Version systemVersion, Version installedVersion) {
+    public boolean hasUpdate(String systemVersion, String installedVersion) {
         PluginRelease last = getLastRelease(systemVersion);
-        return last != null && Version.valueOf(last.version).greaterThan(installedVersion);
+        return last != null && Version.valueOf(last.version).greaterThan(Version.valueOf(installedVersion));
     }
 
     @Override

@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j;
-
-import com.github.zafarkhaja.semver.Version;
+package org.pf4j;
 
 /**
  * PluginDescriptor for testing, with public setters.
@@ -23,38 +21,38 @@ import com.github.zafarkhaja.semver.Version;
 public class TestPluginDescriptor extends PluginDescriptor {
 
     @Override
-    public void setPluginId(String pluginId) {
-        super.setPluginId(pluginId);
+    public PluginDescriptor setPluginId(String pluginId) {
+        return super.setPluginId(pluginId);
     }
 
     @Override
-    public void setPluginDescription(String pluginDescription) {
-        super.setPluginDescription(pluginDescription);
+    public PluginDescriptor setPluginDescription(String pluginDescription) {
+        return super.setPluginDescription(pluginDescription);
     }
 
     @Override
-    public void setPluginClass(String pluginClassName) {
-        super.setPluginClass(pluginClassName);
+    public PluginDescriptor setPluginClass(String pluginClassName) {
+        return super.setPluginClass(pluginClassName);
     }
 
     @Override
-    public void setPluginVersion(Version version) {
-        super.setPluginVersion(version);
+    public PluginDescriptor setPluginVersion(String version) {
+        return super.setPluginVersion(version);
     }
 
     @Override
-    public void setProvider(String provider) {
-        super.setProvider(provider);
+    public PluginDescriptor setProvider(String provider) {
+        return super.setProvider(provider);
     }
 
     @Override
-    public void setRequires(String requires) {
-        super.setRequires(requires);
+    public PluginDescriptor setRequires(String requires) {
+        return super.setRequires(requires);
     }
 
     @Override
-    public void setDependencies(String dependencies) {
-        super.setDependencies(dependencies);
+    public PluginDescriptor setDependencies(String dependencies) {
+        return super.setDependencies(dependencies);
     }
 
 }

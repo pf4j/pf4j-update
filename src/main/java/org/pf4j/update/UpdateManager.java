@@ -13,22 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
 import com.github.zafarkhaja.semver.Version;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.pf4j.PluginException;
+import org.pf4j.PluginManager;
+import org.pf4j.PluginState;
+import org.pf4j.PluginWrapper;
+import org.pf4j.VersionManager;
+import org.pf4j.update.PluginInfo.PluginRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.fortsoft.pf4j.*;
-import ro.fortsoft.pf4j.update.PluginInfo.PluginRelease;
 
-import java.io.*;
-import java.net.*;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Decebal Suiu
@@ -92,7 +104,7 @@ public class UpdateManager {
         for (PluginWrapper installed : pluginManager.getPlugins()) {
             PluginInfo pluginFromRepo = pluginMap.get(installed.getPluginId());
             if (pluginFromRepo != null) {
-                Version installedVersion = installed.getDescriptor().getVersion();
+                String installedVersion = installed.getDescriptor().getVersion();
                 if (pluginFromRepo.hasUpdate(getSystemVersion(), installedVersion)) {
                     updates.add(pluginFromRepo);
                 }
@@ -308,7 +320,7 @@ public class UpdateManager {
             throw new PluginException("Plugin {} does not exist in any repository", id);
         }
 
-        Version installedVersion = pluginManager.getPlugin(id).getDescriptor().getVersion();
+        String installedVersion = pluginManager.getPlugin(id).getDescriptor().getVersion();
         if (!pi.hasUpdate(getSystemVersion(), installedVersion)) {
             log.warn("Plugin {} does not have an update available which is compatible with system version", id, getSystemVersion());
             return false;
@@ -356,8 +368,12 @@ public class UpdateManager {
         repositories = Arrays.asList(items);
     }
 
-    private Version getSystemVersion() {
+    private String getSystemVersion() {
         return pluginManager.getSystemVersion();
+    }
+
+    private VersionManager getVersionManager() {
+        return pluginManager.getVersionManager();
     }
 
 }

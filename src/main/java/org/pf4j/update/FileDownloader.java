@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
-import ro.fortsoft.pf4j.PluginException;
+import org.pf4j.PluginException;
 
 import java.io.IOException;
 import java.net.URL;

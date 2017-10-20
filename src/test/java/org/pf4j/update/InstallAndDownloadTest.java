@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
-import com.github.zafarkhaja.semver.Version;
 import com.google.gson.GsonBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import ro.fortsoft.pf4j.PluginException;
-import ro.fortsoft.pf4j.PluginManager;
-import ro.fortsoft.pf4j.PluginWrapper;
-import ro.fortsoft.pf4j.update.util.PropertiesPluginManager;
-import ro.fortsoft.pf4j.TestPluginDescriptor;
+import org.pf4j.PluginException;
+import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
+import org.pf4j.TestPluginDescriptor;
+import org.pf4j.update.util.PropertiesPluginManager;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -31,17 +30,31 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test downloads etc
  */
 public class InstallAndDownloadTest {
+
     private Path downloadRepoDir;
     private Path pluginFolderDir;
     private MockZipPlugin p1;
@@ -51,7 +64,7 @@ public class InstallAndDownloadTest {
     private MockZipPlugin p5;
     private PluginManager pluginManager;
     private UpdateManager updateManager;
-    private Version systemVersion;
+    private String systemVersion;
     private URL repoUrl;
     private List<PluginWrapper> installed;
 
@@ -66,7 +79,7 @@ public class InstallAndDownloadTest {
         p4 = new MockZipPlugin("other", "3.0.1", "other-3.0.1", "other-3.0.1.Zip", "2017-01-31T12:34:56Z");
         p5 = new MockZipPlugin("wrongDate", "4.0.1", "wrong-4.0.1", "wrong-4.0.1.Zip", "wrong");
         pluginManager = new PropertiesPluginManager(pluginFolderDir);
-        systemVersion = Version.forIntegers(1,8);
+        systemVersion = "1.8";
         pluginManager.setSystemVersion(systemVersion); // Only p2 and p3 are valid
         Path pluginsjson = downloadRepoDir.resolve("plugins.json");
         BufferedWriter writer = Files.newBufferedWriter(pluginsjson, Charset.defaultCharset(), StandardOpenOption.CREATE_NEW);
@@ -157,10 +170,12 @@ public class InstallAndDownloadTest {
     private Date dateFor(String date) throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         return sdf.parse(date);
     }
 
     private class MockZipPlugin {
+
         public final String id;
         public final String version;
         public final String filenameUnzipped;
@@ -186,7 +201,7 @@ public class InstallAndDownloadTest {
 
             descriptor = new TestPluginDescriptor();
             descriptor.setPluginId(id);
-            descriptor.setPluginVersion(Version.valueOf(version));
+            descriptor.setPluginVersion(version);
         }
 
         public MockZipPlugin(String id, String version, String filename, String zipname) throws IOException {
@@ -201,7 +216,7 @@ public class InstallAndDownloadTest {
                 br.newLine();
                 br.write("plugin.version=" + version);
                 br.newLine();
-                br.write("plugin.class=ro.fortsoft.pf4j.update.util.NopPlugin");
+                br.write("plugin.class=NopPlugin");
                 br.close();
                 Files.move(propsFile, propsInZip);
             }
@@ -210,7 +225,7 @@ public class InstallAndDownloadTest {
 
     private String getJsonForPlugins(MockZipPlugin... plugins) {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        Map<String,List<MockZipPlugin>> pluginMap = new HashMap<>();
+        Map<String, List<MockZipPlugin>> pluginMap = new HashMap<>();
         for (MockZipPlugin p : plugins) {
             if (pluginMap.containsKey(p.id)) {
                 List<MockZipPlugin> l = pluginMap.get(p.id);
@@ -221,9 +236,10 @@ public class InstallAndDownloadTest {
                 pluginMap.put(p.id, l);
             }
         }
+
         ArrayList list = new ArrayList<>();
         for (List<MockZipPlugin> l : pluginMap.values()) {
-            Map<String,Object> info = new HashMap<>();
+            Map<String, Object> info = new HashMap<>();
             info.put("id", l.get(0).id);
             List<Object> releases = new ArrayList<>();
             for (MockZipPlugin p : l) {
@@ -236,6 +252,8 @@ public class InstallAndDownloadTest {
             info.put("releases", releases);
             list.add(info);
         }
+
         return gsonBuilder.create().toJson(list);
     }
+
 }

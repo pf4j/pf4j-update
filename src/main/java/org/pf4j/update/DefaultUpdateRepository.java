@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.pf4j.update.PluginInfo.PluginRelease;
+import org.pf4j.update.util.LenientDateTypeAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.fortsoft.pf4j.update.PluginInfo.PluginRelease;
-import ro.fortsoft.pf4j.update.util.LenientDateTypeAdapter;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Decebal Suiu

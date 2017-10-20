@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
 import com.github.zafarkhaja.semver.Version;
 import org.junit.Before;
 import org.junit.Test;
-import ro.fortsoft.pf4j.update.PluginInfo.PluginRelease;
+import org.pf4j.update.PluginInfo.PluginRelease;
 
 import java.util.Arrays;
 
