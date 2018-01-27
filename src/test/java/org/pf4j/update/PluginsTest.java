@@ -21,7 +21,7 @@ import com.google.gson.GsonBuilder;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class PluginsTest {
         p1r1.version = "0.9.0";
         p1r1.date = new Date();
         p1r1.url = "pf4j-demo-plugin1/0.9.0/pf4j-demo-plugin1-0.9.0-SNAPSHOT.zip";
-        p1.releases = Arrays.asList(p1r1);
+        p1.releases = Collections.singletonList(p1r1);
 
         // plugin 2
         PluginInfo p2 = new PluginInfo();
@@ -66,7 +66,7 @@ public class PluginsTest {
         p2r1.version = "0.9.0";
         p2r1.date = new Date();
         p2r1.url = "pf4j-demo-plugin2/0.9.0/pf4j-demo-plugin2-0.9.0-SNAPSHOT.zip";
-        p2.releases = Arrays.asList(p2r1);
+        p2.releases = Collections.singletonList(p2r1);
 
         String json = gson.toJson(plugins);
         try {

@@ -15,7 +15,7 @@
  */
 package org.pf4j.update;
 
-import com.github.zafarkhaja.semver.Version;
+import org.pf4j.VersionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.pf4j.DefaultPluginManager;
@@ -46,7 +46,8 @@ public class UpdateTest {
 
         // create plugin manager
         PluginManager pluginManager = new DefaultPluginManager();
-        Version systemVersion = pluginManager.getSystemVersion();
+        VersionManager versionManager = pluginManager.getVersionManager();
+        String systemVersion = pluginManager.getSystemVersion();
         pluginManager.loadPlugins();
 
         // create update manager
@@ -61,9 +62,9 @@ public class UpdateTest {
             log.debug("Found {} updates", updates.size());
             for (PluginInfo plugin : updates) {
                 log.debug("Found update for plugin '{}'", plugin.id);
-                PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
+                PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion, versionManager);
                 String lastVersion = lastRelease.version;
-                String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion().toString();
+                String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion();
                 log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
                 boolean updated = updateManager.updatePlugin(plugin.id, lastVersion);
                 if (updated) {
@@ -83,7 +84,7 @@ public class UpdateTest {
             log.debug("Found {} available plugins", availablePlugins.size());
             for (PluginInfo plugin : availablePlugins) {
                 log.debug("Found available plugin '{}'", plugin.id);
-                PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
+                PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion, versionManager);
                 String lastVersion = lastRelease.version;
                 log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
                 boolean installed = updateManager.installPlugin(plugin.id, lastVersion);

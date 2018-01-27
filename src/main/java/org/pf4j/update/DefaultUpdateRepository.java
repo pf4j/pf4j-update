@@ -32,25 +32,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * The default implementation of {@link UpdateRepository}.
+ *
  * @author Decebal Suiu
  */
 public class DefaultUpdateRepository implements UpdateRepository {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
 
-    private String pluginsJsonFileName = "plugins.json";
-
     private String id;
     private URL url;
+    private String pluginsJsonFileName;
+
     private Map<String, PluginInfo> plugins;
 
     public DefaultUpdateRepository(String id, URL url) {
-        this.id = id;
-        this.url = url;
+        this(id, url, "plugins.json");
     }
 
     public DefaultUpdateRepository(String id, URL url, String pluginsJsonFileName) {
-        this(id, url);
+        this.id = id;
+        this.url = url;
         this.pluginsJsonFileName = pluginsJsonFileName;
     }
 
@@ -111,7 +113,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     }
 
     /**
-     * Causes plugins.json to be read again to look for new updates from repos
+     * Causes {@code plugins.json} to be read again to look for new updates from repositories.
      */
     @Override
     public void refresh() {
@@ -128,7 +130,8 @@ public class DefaultUpdateRepository implements UpdateRepository {
     }
 
     /**
-     * Choose another file name than plugins.json
+     * Choose another file name than {@code plugins.json}.
+     *
      * @param pluginsJsonFileName the name (relative) of plugins.json file
      */
     public void setPluginsJsonFileName(String pluginsJsonFileName) {

@@ -33,6 +33,7 @@ import static org.junit.Assert.*;
  * Tests file download
  */
 public class FileDownloadTest {
+
     private SimpleFileDownloader downloader;
     private WebServer webserver;
     private Path updateRepoDir;
@@ -93,4 +94,5 @@ public class FileDownloadTest {
     public void notRegularFile() throws Exception {
         downloader.validateDownload(null, updateRepoDir);
     }
+
 }

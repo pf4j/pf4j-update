@@ -15,7 +15,6 @@
  */
 package org.pf4j.update;
 
-import com.github.zafarkhaja.semver.Version;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.pf4j.PluginException;
@@ -27,7 +26,6 @@ import org.pf4j.update.PluginInfo.PluginRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -49,15 +47,18 @@ public class UpdateManager {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateManager.class);
 
+    private PluginManager pluginManager;
+    private VersionManager versionManager;
+    private String systemVersion;
     private Path repositoriesJson;
 
     protected List<UpdateRepository> repositories;
 
-    public PluginManager pluginManager;
-
     public UpdateManager(PluginManager pluginManager) {
         this.pluginManager = pluginManager;
 
+        versionManager = pluginManager.getVersionManager();
+        systemVersion = pluginManager.getSystemVersion();
         repositoriesJson = Paths.get("repositories.json");
     }
 
@@ -95,7 +96,8 @@ public class UpdateManager {
     }
 
     /**
-     * Return a list of plugins that are newer versions of already installed plugins
+     * Return a list of plugins that are newer versions of already installed plugins.
+     *
      * @return list of plugins that have updates
      */
     public List<PluginInfo> getUpdates() {
@@ -105,7 +107,7 @@ public class UpdateManager {
             PluginInfo pluginFromRepo = pluginMap.get(installed.getPluginId());
             if (pluginFromRepo != null) {
                 String installedVersion = installed.getDescriptor().getVersion();
-                if (pluginFromRepo.hasUpdate(getSystemVersion(), installedVersion)) {
+                if (pluginFromRepo.hasUpdate(systemVersion, installedVersion, versionManager)) {
                     updates.add(pluginFromRepo);
                 }
             }
@@ -115,7 +117,8 @@ public class UpdateManager {
     }
 
     /**
-     * Checks if Update Repositories has newer versions of some of the installed plugins
+     * Checks if Update Repositories has newer versions of some of the installed plugins.
+     *
      * @return true if updates exist
      */
     public boolean hasUpdates() {
@@ -123,17 +126,20 @@ public class UpdateManager {
     }
 
     /**
-     * Get the list of plugins from all repos
+     * Get the list of plugins from all repos.
+     *
      * @return List of plugin info
      */
     public List<PluginInfo> getPlugins() {
         List<PluginInfo> list = new ArrayList<>(getPluginsMap().values());
         Collections.sort(list);
+
         return list;
     }
 
     /**
-     * Get a map of all plugins from all repos where key is plugin id
+     * Get a map of all plugins from all repos where key is plugin id.
+     *
      * @return List of plugin info
      */
     public Map<String, PluginInfo> getPluginsMap() {
@@ -154,7 +160,8 @@ public class UpdateManager {
     }
 
     /**
-     * Replace all repositories
+     * Replace all repositories.
+     *
      * @param repositories list of new repositories
      */
     public void setRepositories(List<UpdateRepository> repositories) {
@@ -163,7 +170,8 @@ public class UpdateManager {
     }
 
     /**
-     * Add one DefaultUpdateRepository
+     * Add one {@link DefaultUpdateRepository).
+     *
      * @param id of repo
      * @param url of repo
      */
@@ -177,7 +185,8 @@ public class UpdateManager {
     }
 
     /**
-     * Add a repo that was created by client
+     * Add a repo that was created by client.
+     *
      * @param newRepo the new UpdateRepository to add to the list
      */
     public void addRepository(UpdateRepository newRepo) {
@@ -191,7 +200,8 @@ public class UpdateManager {
     }
 
     /**
-     * Remove a repository by id
+     * Remove a repository by id.
+     *
      * @param id of repository to remove
      */
     public void removeRepository(String id) {
@@ -205,7 +215,7 @@ public class UpdateManager {
     }
 
     /**
-     * Refreshes all repositories, so they are forced to refresh list of plugins
+     * Refreshes all repositories, so they are forced to refresh list of plugins.
      */
     public synchronized void refresh() {
         if (repositoriesJson != null) {
@@ -217,7 +227,8 @@ public class UpdateManager {
     }
 
     /**
-     * Installs a plugin by id and version
+     * Installs a plugin by id and version.
+     *
      * @param id the id of plugin to install
      * @param version the version of plugin to install, on SemVer format, or null for latest
      * @return true if installation successful and plugin started
@@ -242,7 +253,8 @@ public class UpdateManager {
     }
 
     /**
-     * Downloads a plugin with given coordinates and returns a path to the file
+     * Downloads a plugin with given coordinates and returns a path to the file.
+     *
      * @param id of plugin
      * @param version of plugin or null to download latest
      * @return Path to file which will reside in a temporary folder in the system default temp area
@@ -258,7 +270,8 @@ public class UpdateManager {
     }
 
     /**
-     * Finds the FileDownloader to use for this repository
+     * Finds the {@link FileDownloader} to use for this repository.
+     *
      * @param pluginId the plugin we wish to download
      * @return FileDownloader instance
      */
@@ -273,7 +286,8 @@ public class UpdateManager {
     }
 
     /**
-     * Resolves url from id and version
+     * Resolves url from id and version.
+     *
      * @param id of plugin
      * @param version of plugin or null to locate latest version
      * @return URL for downloading
@@ -288,11 +302,11 @@ public class UpdateManager {
 
         try {
             if (version == null) {
-                return new URL(plugin.getLastRelease(getSystemVersion()).url);
+                return new URL(plugin.getLastRelease(systemVersion, versionManager).url);
             }
 
             for (PluginRelease release : plugin.releases) {
-                if (Version.valueOf(version).equals(Version.valueOf(release.version)) && release.url != null) {
+                if (versionManager.compareVersions(version, release.version) == 0 && release.url != null) {
                     return new URL(release.url);
                 }
             }
@@ -304,7 +318,8 @@ public class UpdateManager {
     }
 
     /**
-     * Updates a plugin id to given version or to latest version if version == null
+     * Updates a plugin id to given version or to latest version if {@code version == null}.
+     *
      * @param id the id of plugin to update
      * @param version the version to update to, on SemVer format, or null for latest
      * @return true if update successful
@@ -321,8 +336,8 @@ public class UpdateManager {
         }
 
         String installedVersion = pluginManager.getPlugin(id).getDescriptor().getVersion();
-        if (!pi.hasUpdate(getSystemVersion(), installedVersion)) {
-            log.warn("Plugin {} does not have an update available which is compatible with system version", id, getSystemVersion());
+        if (!pi.hasUpdate(systemVersion, installedVersion, versionManager)) {
+            log.warn("Plugin {} does not have an update available which is compatible with system version", id, systemVersion);
             return false;
         }
 
@@ -352,28 +367,15 @@ public class UpdateManager {
     }
 
     protected synchronized void initRepositoriesFromJson() {
-        FileReader reader;
-        try {
-            log.debug("Read repositories from '{}'", repositoriesJson);
-            reader = new FileReader(repositoriesJson.toFile());
-        } catch (FileNotFoundException e) {
+        log.debug("Read repositories from '{}'", repositoriesJson);
+        try (FileReader reader = new FileReader(repositoriesJson.toFile())) {
+            Gson gson = new GsonBuilder().create();
+            UpdateRepository[] items = gson.fromJson(reader, DefaultUpdateRepository[].class);
+            repositories = Arrays.asList(items);
+        } catch (IOException e) {
             e.printStackTrace();
             repositories = Collections.emptyList();
-            return;
         }
-
-        Gson gson = new GsonBuilder().create();
-        UpdateRepository[] items = gson.fromJson(reader, DefaultUpdateRepository[].class);
-
-        repositories = Arrays.asList(items);
-    }
-
-    private String getSystemVersion() {
-        return pluginManager.getSystemVersion();
-    }
-
-    private VersionManager getVersionManager() {
-        return pluginManager.getVersionManager();
     }
 
 }

@@ -18,10 +18,10 @@ package org.pf4j;
 /**
  * PluginDescriptor for testing, with public setters.
  */
-public class TestPluginDescriptor extends PluginDescriptor {
+public class TestPluginDescriptor extends DefaultPluginDescriptor {
 
     @Override
-    public PluginDescriptor setPluginId(String pluginId) {
+    public DefaultPluginDescriptor setPluginId(String pluginId) {
         return super.setPluginId(pluginId);
     }
 
@@ -36,7 +36,7 @@ public class TestPluginDescriptor extends PluginDescriptor {
     }
 
     @Override
-    public PluginDescriptor setPluginVersion(String version) {
+    public DefaultPluginDescriptor setPluginVersion(String version) {
         return super.setPluginVersion(version);
     }
 

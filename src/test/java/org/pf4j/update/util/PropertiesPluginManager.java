@@ -22,9 +22,11 @@ import org.pf4j.PropertiesPluginDescriptorFinder;
 import java.nio.file.Path;
 
 /**
- * Manager using properties instead of manifest, for testing
+ * Manager using properties instead of manifest, for testing.
+ *
  */
 public class PropertiesPluginManager extends DefaultPluginManager {
+
     public PropertiesPluginManager(Path pluginsRoot) {
         super(pluginsRoot);
     }
@@ -38,4 +40,5 @@ public class PropertiesPluginManager extends DefaultPluginManager {
     protected PluginDescriptorFinder getPluginDescriptorFinder() {
         return new PropertiesPluginDescriptorFinder("my.properties");
     }
+
 }

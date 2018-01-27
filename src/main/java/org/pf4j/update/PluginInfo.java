@@ -15,9 +15,6 @@
  */
 package org.pf4j.update;
 
-import com.github.zafarkhaja.semver.Version;
-import com.github.zafarkhaja.semver.expr.Expression;
-import com.github.zafarkhaja.semver.expr.ExpressionParser;
 import org.pf4j.VersionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * PluginInfo describing a plugin from a repo
+ * {@code PluginInfo} describing a plugin from a repository.
  */
 public class PluginInfo implements Serializable, Comparable<PluginInfo> {
 
@@ -49,19 +46,18 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     private Map<String, PluginRelease> lastRelease = new HashMap<>();
 
     /**
-     * Returns the last release version of this plugin for given system version, regardless of release date
+     * Returns the last release version of this plugin for given system version, regardless of release date.
+     *
      * @param systemVersion version of host system where plugin will be installed
      * @return PluginRelease which has the highest version number
      */
     public PluginRelease getLastRelease(String systemVersion, VersionManager versionManager) {
         if (!lastRelease.containsKey(systemVersion)) {
             for (PluginRelease release : releases) {
-                Expression requires = release.getRequiresExpression();
-
-                if (systemVersion.equals("0.0.0") || versionManager.satisfies(requires, systemVersion)) {
+                if (systemVersion.equals("0.0.0") || versionManager.checkVersionConstraint(systemVersion, release.requires)) {
                     if (lastRelease.get(systemVersion) == null) {
                         lastRelease.put(systemVersion, release);
-                    } else if (release.compareTo(lastRelease.get(systemVersion)) > 0) {
+                    } else if (versionManager.compareVersions(release.version, lastRelease.get(systemVersion).version) > 0) {
                         lastRelease.put(systemVersion, release);
                     }
                 }
@@ -72,14 +68,17 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     }
 
     /**
-     * Finds whether the  newer version of the plugin
+     * Finds whether the newer version of the plugin.
+     *
      * @param systemVersion version of host system where plugin will be installed
      * @param installedVersion version that is already installed
+     * @param versionManager version manager
      * @return true if there is a newer version available which is compatible with system
      */
-    public boolean hasUpdate(String systemVersion, String installedVersion) {
-        PluginRelease last = getLastRelease(systemVersion);
-        return last != null && Version.valueOf(last.version).greaterThan(Version.valueOf(installedVersion));
+    public boolean hasUpdate(String systemVersion, String installedVersion, VersionManager versionManager) {
+        PluginRelease last = getLastRelease(systemVersion, versionManager);
+        return last != null && versionManager.compareVersions(last.version, installedVersion) > 0;
+
     }
 
     @Override
@@ -95,30 +94,12 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
         this.repositoryId = repositoryId;
     }
 
-    public static class PluginRelease implements Serializable, Comparable<PluginRelease> {
+    public static class PluginRelease implements Serializable {
 
         public String version;
         public Date date;
         public String requires;
         public String url;
-
-        @Override
-        public int compareTo(PluginRelease o) {
-            return Version.valueOf(version).compareTo(Version.valueOf(o.version));
-        }
-
-        /**
-         * Get the required version as a SemVer Expression
-         * @return Expression object that can be compared to a Version. If requires is empty, a wildcard version is returned
-         */
-        public Expression getRequiresExpression() {
-            try {
-                return ExpressionParser.newInstance().parse(requires == null ? "*" : requires);
-            } catch (Exception e) {
-                log.warn("Failed to parse 'requires' expression {} for plugin {}. Allowing all versions", requires, url, e);
-                return ExpressionParser.newInstance().parse("*");
-            }
-        }
 
     }
 

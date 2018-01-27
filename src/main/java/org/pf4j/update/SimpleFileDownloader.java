@@ -45,6 +45,7 @@ public class SimpleFileDownloader implements FileDownloader {
     /**
      * Downloads a file. If HTTP(S) or FTP, stream content, if local file:/ do a simple filesystem copy to tmp folder.
      * Other protocols not supported.
+     *
      * @param fileUrl the URI representing the file to download
      * @return the path of downloaded/copied file
      * @throws IOException in case of network or IO problems
@@ -56,17 +57,16 @@ public class SimpleFileDownloader implements FileDownloader {
             case "https":
             case "ftp":
                 return downloadFileHttp(fileUrl);
-
             case "file":
                 return copyLocalFile(fileUrl);
-
             default:
                 throw new PluginException("URL protocol {} not supported", fileUrl.getProtocol());
         }
     }
 
     /**
-     * Efficient copy of file in case of local file system
+     * Efficient copy of file in case of local file system.
+     *
      * @param fileUrl source file
      * @return path of target file
      * @throws IOException if problems during copy
@@ -83,6 +83,7 @@ public class SimpleFileDownloader implements FileDownloader {
             Path toFile = destination.resolve(fileName);
             Files.copy(fromFile, toFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
             validateDownload(fileUrl, toFile);
+
             return toFile;
         } catch (URISyntaxException e) {
             throw new PluginException("Something wrong with given URL", e);
@@ -90,7 +91,8 @@ public class SimpleFileDownloader implements FileDownloader {
     }
 
     /**
-     * Downloads file from HTTP or FTP
+     * Downloads file from HTTP or FTP.
+     *
      * @param fileUrl source file
      * @return path of downloaded file
      * @throws IOException if IO problems
@@ -147,12 +149,14 @@ public class SimpleFileDownloader implements FileDownloader {
         Files.setLastModifiedTime(file, FileTime.fromMillis(lastModified));
 
         validateDownload(fileUrl, file);
+
         return file;
     }
 
     /**
-     * Succeeds if downloaded file exists and has size &gt; 0
-     * <p>Override this method to provide your own validation rules such as content length matching or checksum checking etc</p>
+     * Succeeds if downloaded file exists and has size &gt; 0.
+     * <p>Override this method to provide your own validation rules such as content length matching or checksum checking etc</p>.
+     *
      * @param originalUrl the source from which the file was downloaded
      * @param downloadedFile the path to the downloaded file
      * @throws PluginException if the validation failed

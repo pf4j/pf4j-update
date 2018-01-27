@@ -19,42 +19,45 @@ import java.net.URL;
 import java.util.Map;
 
 /**
- * Contract for update repositories
+ * Contract for update repositories.
  */
 public interface UpdateRepository {
 
     /**
-     * @return the ID of this repo. This must be unique
+     * @return the ID of this repository. This must be unique
      */
     String getId();
 
     /**
-     * @return the URL of this repo as a String
+     * @return the URL of this repository as a String
      */
     URL getUrl();
 
     /**
-     * Get all plugin descriptors for this repo
+     * Get all plugin information for this repository.
+     *
      * @return Map of PluginId and PluginInfo
      */
     Map<String, PluginInfo> getPlugins();
 
     /**
-     * Get a particular plugin from this repo
+     * Get a particular plugin information from this repository.
+     *
      * @param id the id of the plugin
      * @return the PluginInfo
      */
     PluginInfo getPlugin(String id);
 
     /**
-     * Flushes cached info to force re-fetching repository state on next get
+     * Flushes cached info to force re-fetching repository state on next get.
      */
     void refresh();
 
     /**
      * Each repository has the option of overriding the download process.
-     * They can e.g. do checksumming, signature verifications etc.
-     * To use the default downloader, return null
+     * They can e.g. do checksum, signature verifications etc.
+     * To use the default downloader, return null.
+     *
      * @return the FileDownloader to use for this repository or null if you do not wish to override
      */
     FileDownloader getFileDownloader();
