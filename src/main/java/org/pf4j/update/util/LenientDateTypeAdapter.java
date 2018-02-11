@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update.util;
+package org.pf4j.update.util;
 
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;

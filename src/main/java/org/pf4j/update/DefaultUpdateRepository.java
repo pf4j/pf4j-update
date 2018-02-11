@@ -13,38 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.pf4j.update.PluginInfo.PluginRelease;
+import org.pf4j.update.util.LenientDateTypeAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ro.fortsoft.pf4j.update.PluginInfo.PluginRelease;
-import ro.fortsoft.pf4j.update.util.LenientDateTypeAdapter;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * The default implementation of {@link UpdateRepository}.
+ *
  * @author Decebal Suiu
  */
 public class DefaultUpdateRepository implements UpdateRepository {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
 
-    private String pluginsJsonFileName = "plugins.json";
-
     private String id;
     private URL url;
+    private String pluginsJsonFileName;
+
     private Map<String, PluginInfo> plugins;
 
     public DefaultUpdateRepository(String id, URL url) {
-        this.id = id;
-        this.url = url;
+        this(id, url, "plugins.json");
     }
 
     public DefaultUpdateRepository(String id, URL url, String pluginsJsonFileName) {
-        this(id, url);
+        this.id = id;
+        this.url = url;
         this.pluginsJsonFileName = pluginsJsonFileName;
     }
 
@@ -105,7 +113,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     }
 
     /**
-     * Causes plugins.json to be read again to look for new updates from repos
+     * Causes {@code plugins.json} to be read again to look for new updates from repositories.
      */
     @Override
     public void refresh() {
@@ -122,7 +130,8 @@ public class DefaultUpdateRepository implements UpdateRepository {
     }
 
     /**
-     * Choose another file name than plugins.json
+     * Choose another file name than {@code plugins.json}.
+     *
      * @param pluginsJsonFileName the name (relative) of plugins.json file
      */
     public void setPluginsJsonFileName(String pluginsJsonFileName) {

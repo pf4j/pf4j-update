@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
-import com.github.zafarkhaja.semver.Version;
 import org.junit.Before;
 import org.junit.Test;
-import ro.fortsoft.pf4j.update.PluginInfo.PluginRelease;
+import org.pf4j.DefaultVersionManager;
+import org.pf4j.VersionManager;
+import org.pf4j.update.PluginInfo.PluginRelease;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.*;
 
@@ -28,8 +30,10 @@ import static org.junit.Assert.*;
  * Test the pluginInfo
  */
 public class PluginInfoTest {
+
     private PluginInfo pi1;
     private PluginInfo pi2;
+    private VersionManager versionManager;
 
     @Before
     public void setup() {
@@ -49,7 +53,9 @@ public class PluginInfoTest {
         PluginRelease pi2r1 = new PluginRelease();
         pi2r1.version = "1.0.0";
         pi2.id = "aaa";
-        pi2.releases = Arrays.asList(pi2r1);
+        pi2.releases = Collections.singletonList(pi2r1);
+
+        versionManager = new DefaultVersionManager();
     }
 
     @Test
@@ -58,23 +64,23 @@ public class PluginInfoTest {
     }
 
     @Test
-    public void getLastRelease() throws Exception {
-        assertEquals("1.0.0", pi1.getLastRelease(Version.forIntegers(2, 0, 1)).version);
-        assertEquals("1.0.0", pi1.getLastRelease(Version.forIntegers(2, 5)).version);
-        assertEquals("1.1.0", pi1.getLastRelease(Version.forIntegers(2, 1, 8)).version);
-        assertEquals("1.2.0", pi1.getLastRelease(Version.forIntegers(3)).version);
-        assertEquals("1.2.0", pi1.getLastRelease(Version.forIntegers(0, 0, 0)).version);
-        assertEquals(null, pi1.getLastRelease(Version.forIntegers(4)));
+    public void getLastRelease() {
+        assertEquals("1.0.0", pi1.getLastRelease("2.0.1", versionManager).version);
+        assertEquals("1.0.0", pi1.getLastRelease("2.5.0", versionManager).version);
+        assertEquals("1.1.0", pi1.getLastRelease("2.1.8", versionManager).version);
+        assertEquals("1.2.0", pi1.getLastRelease("3.0.0", versionManager).version);
+        assertEquals("1.2.0", pi1.getLastRelease("0.0.0", versionManager).version);
+        assertEquals(null, pi1.getLastRelease("4.0.0", versionManager));
     }
 
     @Test
-    public void hasUpdate() throws Exception {
-        assertTrue(pi1.hasUpdate(Version.forIntegers(3), Version.valueOf("1.1.0")));
-        assertFalse(pi1.hasUpdate(Version.forIntegers(2, 3), Version.valueOf("1.1.0")));
+    public void hasUpdate() {
+        assertTrue(pi1.hasUpdate("3.0.0", "1.1.0", versionManager));
+        assertFalse(pi1.hasUpdate("2.3.0", "1.1.0", versionManager));
 
         // There are no versions certified for System version 5, so no updates either.
         // In this case, the installed plugin will be disabled by pf4j
-        assertFalse(pi1.hasUpdate(Version.forIntegers(5), Version.valueOf("1.0.0")));
+        assertFalse(pi1.hasUpdate("5.0.0", "1.0.0", versionManager));
     }
 
 }

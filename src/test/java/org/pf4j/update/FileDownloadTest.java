@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
 import org.junit.Before;
 import org.junit.Test;
-import ro.fortsoft.pf4j.PluginException;
+import org.pf4j.PluginException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -33,6 +33,7 @@ import static org.junit.Assert.*;
  * Tests file download
  */
 public class FileDownloadTest {
+
     private SimpleFileDownloader downloader;
     private WebServer webserver;
     private Path updateRepoDir;
@@ -93,4 +94,5 @@ public class FileDownloadTest {
     public void notRegularFile() throws Exception {
         downloader.validateDownload(null, updateRepoDir);
     }
+
 }

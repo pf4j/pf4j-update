@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ro.fortsoft.pf4j.update;
+package org.pf4j.update;
 
-import ro.fortsoft.pf4j.PluginException;
+import org.pf4j.PluginException;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 
 /**
- * Interface to download a file
+ * Interface to download a file.
  */
 public interface FileDownloader {
 
     /**
      * Downloads a file to destination. The implementation should download to a temporary folder.
      * Implementations may choose to support different protocols such as http, https, ftp, file...
-     * The path returned must be of temporary nature and will most probably be moved/deleted by consumer
+     * The path returned must be of temporary nature and will most probably be moved/deleted by consumer.
+     *
      * @param fileUrl the URL representing the file to download
      * @return Path of downloaded file, typically in a temporary folder
      * @throws IOException if there was an IO problem during download

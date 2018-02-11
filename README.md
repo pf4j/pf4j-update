@@ -1,7 +1,7 @@
 PF4J - Update
 =====================
 [![Travis CI Build Status](https://travis-ci.org/decebals/pf4j-update.png)](https://travis-ci.org/decebals/pf4j-update)
-[![Maven Central](http://img.shields.io/maven-central/v/ro.fortsoft.pf4j/pf4j-update.svg)](http://search.maven.org/#search|ga|1|pf4j-update)
+[![Maven Central](http://img.shields.io/maven-central/v/org.pf4j/pf4j-update.svg)](http://search.maven.org/#search|ga|1|pf4j-update)
 
 The goal of this project is to supply an update mechanism for [PF4J](https://github.com/decebals/pf4j).  
 It's an open source (Apache license) lightweight (around 15KB) extension for PF4J, with minimal dependencies (only pf4j and gson).
@@ -20,7 +20,7 @@ In your pom.xml you must define the dependencies to PF4J artifacts with:
 
 ```xml
 <dependency>
-    <groupId>ro.fortsoft.pf4j</groupId>
+    <groupId>org.pf4j</groupId>
     <artifactId>pf4j-update</artifactId>
     <version>${pf4j-update.version}</version>
 </dependency>    
