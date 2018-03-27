@@ -17,17 +17,19 @@ package org.pf4j.update;
 
 import org.pf4j.PluginException;
 
-// Marker exception for plugin verification failure
+/**
+ * Marker exception for plugin verification failure
+ */
 public class VerifyException extends PluginException {
-  public VerifyException(String message) {
-    super(message);
-  }
+    public VerifyException(String message) {
+        super(message);
+    }
 
-  public VerifyException(Throwable cause, String message, Object... args) {
-    super(cause, message, args);
-  }
+    public VerifyException(Throwable cause, String message, Object... args) {
+        super(cause, message, args);
+    }
 
-  public VerifyException(String message, Object... args) {
-    super(message, args);
-  }
+    public VerifyException(String message, Object... args) {
+        super(message, args);
+    }
 }
