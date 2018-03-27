@@ -1,9 +1,9 @@
 PF4J - Update
 =====================
-[![Travis CI Build Status](https://travis-ci.org/decebals/pf4j-update.png)](https://travis-ci.org/decebals/pf4j-update)
+[![Travis CI Build Status](https://travis-ci.org/pf4j/pf4j-update.png)](https://travis-ci.org/pf4j/pf4j-update)
 [![Maven Central](http://img.shields.io/maven-central/v/org.pf4j/pf4j-update.svg)](http://search.maven.org/#search|ga|1|pf4j-update)
 
-The goal of this project is to supply an update mechanism for [PF4J](https://github.com/decebals/pf4j).  
+The goal of this project is to supply an update mechanism for [PF4J](https://github.com/pf4j/pf4j).
 It's an open source (Apache license) lightweight (around 15KB) extension for PF4J, with minimal dependencies (only pf4j and gson).
 
 Components
@@ -221,7 +221,8 @@ Resulting `UpdateRepository.PluginRelease.url`: `http://localhost:8081/pf4j-demo
 
 In the _downloads_ folder of the project you have a repository (plugins.json and artifacts - plugins archives) used by the test applications.
 The structure of the repository is:
-- plugin1  
+
+- plugin1
     - 0.8.0  
         - plugin1.zip  
     - 0.9.0  
@@ -231,14 +232,14 @@ The structure of the repository is:
         - plugin2.zip  
     - 0.9.0        
         - plugin2.zip  
-- plugins.json   
+- plugins.json
 
 For each plugin you have a folder (plugin1, plugin2) that contains subfolder for each version (0.8.0, 0.9.0). 
 In each version folder you have the plugin archive (.zip) according to PF4J specification.  
 
 Mailing list
 --------------
-Much of the conversation between developers and users is managed through [mailing list] (http://groups.google.com/group/pf4j).
+Much of the conversation between developers and users is managed through [mailing list](http://groups.google.com/group/pf4j).
 
 Versioning
 ------------
@@ -255,16 +256,3 @@ And constructed with the following guidelines:
 * Bug fixes and misc changes bump the patch
 
 For more information on SemVer, please visit http://semver.org/.
-
-License
---------------
-Copyright (C) 2012-present the original author or authors.
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this work except in compliance with
-the License. You may obtain a copy of the License in the LICENSE file, or at:
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
-an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
