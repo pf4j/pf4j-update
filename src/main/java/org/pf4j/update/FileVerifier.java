@@ -34,7 +34,7 @@ public interface FileVerifier {
      * @throws IOException     if there was a problem accessing file
      * @throws VerifyException in case of problems verifying the file
      */
-    void verifyFile(Context context, Path file) throws IOException, VerifyException;
+    void verify(Context context, Path file) throws IOException, VerifyException;
 
     /**
      * Context to be passed to file verifiers

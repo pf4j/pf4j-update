@@ -272,7 +272,7 @@ public class UpdateManager {
     private void verifyFile(String id, PluginRelease release, Path downloaded) throws VerifyException, IOException {
         for (FileVerifier verifier : getFileVerifiers(id)) {
             log.debug("Verifying plugin id {}, release {}, path {}", id, release, downloaded);
-            verifier.verifyFile(new FileVerifier.Context(id, release), downloaded);
+            verifier.verify(new FileVerifier.Context(id, release), downloaded);
         }
     }
 

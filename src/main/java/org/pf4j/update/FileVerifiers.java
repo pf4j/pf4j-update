@@ -28,8 +28,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.pf4j.update.FileVerifiers.VerifierUtils.replaceSuffix;
-
 /**
  * Collection of standard file verifiers.
  * Other implementations could e.g. be Antivirus checks, scanning for forbidden jar files,
@@ -41,7 +39,7 @@ public class FileVerifiers {
    */
   public static final List<FileVerifier> ALL_DEFAULT_FILE_VERIFIERS = Arrays.asList(
       new FileVerifiers.BasicVerifier(),
-      new FileVerifiers.Sha512SumFileVerifier());
+      new Sha512SumVerifier());
 
   /**
    * Verifies that the SHA512 checksum of a downloaded file equals the checksum given in
@@ -49,7 +47,7 @@ public class FileVerifiers {
    * the same as intended. Especially useful when dealing with meta repositories pointing
    * to S3 or other 3rd party download locations that could have been tampered with.
    */
-  public static class Sha512SumFileVerifier implements FileVerifier {
+  public static class Sha512SumVerifier implements FileVerifier {
     private static final Logger log = LoggerFactory.getLogger(SimpleFileDownloader.class);
 
     /**
@@ -61,14 +59,15 @@ public class FileVerifiers {
      * @throws VerifyException in case of problems verifying the file
      */
     @Override
-    public void verifyFile(Context context, Path file) throws VerifyException, IOException {
+    public void verify(Context context, Path file) throws VerifyException, IOException {
       String expectedSha512sum;
       try {
         if (context.sha512sum == null) {
           log.debug("No sha512 checksum specified, skipping verification");
           return;
         } else if (context.sha512sum.equalsIgnoreCase(".sha512")) {
-          expectedSha512sum = getUrlContents(replaceSuffix(context.url, ".sha512")).split(" ")[0].trim();
+          String url = context.url.substring(0, context.url.lastIndexOf(".")) + ".sha512";;
+          expectedSha512sum = getUrlContents(url).split(" ")[0].trim();
         } else if (context.sha512sum.startsWith("http")) {
           expectedSha512sum = getUrlContents(context.sha512sum).split(" ")[0].trim();
         } else {
@@ -109,17 +108,10 @@ public class FileVerifiers {
      * @throws VerifyException in case of problems verifying the file
      */
     @Override
-    public void verifyFile(Context context, Path file) throws VerifyException, IOException {
+    public void verify(Context context, Path file) throws VerifyException, IOException {
       if (!Files.isRegularFile(file) || Files.size(file) == 0) {
         throw new VerifyException("File {} is not a regular file or has size 0", file);
       }
-    }
-  }
-
-  public static class VerifierUtils {
-    public static String replaceSuffix(String url, String newSuffix) {
-      String urlWithoutSuffix = url.substring(0, url.lastIndexOf("."));
-      return urlWithoutSuffix + newSuffix;
     }
   }
 }
