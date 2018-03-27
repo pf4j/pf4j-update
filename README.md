@@ -235,7 +235,7 @@ In each version folder you have the plugin archive (.zip) according to PF4J spec
 
 Mailing list
 --------------
-Much of the conversation between developers and users is managed through [mailing list] (http://groups.google.com/group/pf4j).
+Much of the conversation between developers and users is managed through [mailing list](http://groups.google.com/group/pf4j).
 
 Versioning
 ------------
