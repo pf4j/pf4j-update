@@ -26,10 +26,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The default implementation of {@link UpdateRepository}.
@@ -39,7 +36,6 @@ import java.util.Map;
 public class DefaultUpdateRepository implements UpdateRepository {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
-
     private String id;
     private URL url;
     private String pluginsJsonFileName;
@@ -123,6 +119,16 @@ public class DefaultUpdateRepository implements UpdateRepository {
     @Override
     public FileDownloader getFileDownloader() {
         return new SimpleFileDownloader();
+    }
+
+    /**
+     * Gets a list of file verifiers to execute on the downloaded file for it to be claimed valid
+     *
+     * @return list of {@link FileVerifier}s
+     */
+    @Override
+    public List<FileVerifier> getFileVerfiers() {
+        return FileVerifiers.ALL_DEFAULT_FILE_VERIFIERS;
     }
 
     public String getPluginsJsonFileName() {

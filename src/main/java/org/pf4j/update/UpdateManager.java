@@ -28,17 +28,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Decebal Suiu
@@ -243,7 +237,7 @@ public class UpdateManager {
         try {
             Files.move(downloaded, file);
         } catch (IOException e) {
-            throw new PluginException("Failed to write file '{}' to plugins folder", file);
+            throw new PluginException(e, "Failed to write file '{}' to plugins folder", file);
         }
 
         String pluginId = pluginManager.loadPlugin(file);
@@ -253,7 +247,8 @@ public class UpdateManager {
     }
 
     /**
-     * Downloads a plugin with given coordinates and returns a path to the file.
+     * Downloads a plugin with given coordinates, runs all {@link FileVerifier}s
+     * and returns a path to the downloaded file.
      *
      * @param id of plugin
      * @param version of plugin or null to download latest
@@ -262,10 +257,22 @@ public class UpdateManager {
      */
     protected Path downloadPlugin(String id, String version) throws PluginException {
         try {
-            URL url = findUrlForPlugin(id, version);
-            return getFileDownloader(id).downloadFile(url);
+            PluginRelease release = findReleaseForPlugin(id, version);
+            Path downloaded = getFileDownloader(id).downloadFile(new URL(release.url));
+            verifyFile(id, release, downloaded);
+            return downloaded;
         } catch (IOException e) {
             throw new PluginException(e, "Error during download of plugin {}", id);
+        }
+    }
+
+    /**
+     * Verifies download using all configured {@link FileVerifier}s
+     */
+    private void verifyFile(String id, PluginRelease release, Path downloaded) throws VerifyException, IOException {
+        for (FileVerifier verifier : getFileVerifiers(id)) {
+            log.debug("Verifying plugin id {}, release {}, path {}", id, release, downloaded);
+            verifier.verifyFile(new FileVerifier.Context(id, release), downloaded);
         }
     }
 
@@ -286,32 +293,44 @@ public class UpdateManager {
     }
 
     /**
-     * Resolves url from id and version.
+     * Finds the {@link FileDownloader} to use for this repository.
+     *
+     * @param pluginId the plugin we wish to download
+     * @return FileDownloader instance
+     */
+    protected List<FileVerifier> getFileVerifiers(String pluginId) {
+        for (UpdateRepository ur : repositories) {
+            if (ur.getPlugin(pluginId) != null && ur.getFileVerfiers() != null) {
+                return ur.getFileVerfiers();
+            }
+        }
+
+        return FileVerifiers.ALL_DEFAULT_FILE_VERIFIERS;
+    }
+
+    /**
+     * Resolves Release from id and version.
      *
      * @param id of plugin
      * @param version of plugin or null to locate latest version
-     * @return URL for downloading
+     * @return PluginRelease for downloading
      * @throws PluginException if id or version does not exist
      */
-    protected URL findUrlForPlugin(String id, String version) throws PluginException {
+    protected PluginRelease findReleaseForPlugin(String id, String version) throws PluginException {
         PluginInfo plugin = getPluginsMap().get(id);
         if (plugin == null) {
             log.info("Plugin with id {} does not exist in any repository", id);
             throw new PluginException("Plugin with id {} not found in any repository", id);
         }
 
-        try {
-            if (version == null) {
-                return new URL(plugin.getLastRelease(systemVersion, versionManager).url);
-            }
+        if (version == null) {
+            return plugin.getLastRelease(systemVersion, versionManager);
+        }
 
-            for (PluginRelease release : plugin.releases) {
-                if (versionManager.compareVersions(version, release.version) == 0 && release.url != null) {
-                    return new URL(release.url);
-                }
+        for (PluginRelease release : plugin.releases) {
+            if (versionManager.compareVersions(version, release.version) == 0 && release.url != null) {
+                return release;
             }
-        } catch (MalformedURLException e) {
-            throw new PluginException(e);
         }
 
         throw new PluginException("Plugin {} with version @{} does not exist in the repository", id, version);

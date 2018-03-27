@@ -37,5 +37,4 @@ public interface FileDownloader {
      * @throws PluginException in case of other problems, such as unsupported protocol
      */
     Path downloadFile(URL fileUrl) throws PluginException, IOException;
-
 }

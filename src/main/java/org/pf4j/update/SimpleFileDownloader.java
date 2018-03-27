@@ -82,7 +82,6 @@ public class SimpleFileDownloader implements FileDownloader {
             String fileName = path.substring(path.lastIndexOf('/') + 1);
             Path toFile = destination.resolve(fileName);
             Files.copy(fromFile, toFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-            validateDownload(fileUrl, toFile);
 
             return toFile;
         } catch (URISyntaxException e) {
@@ -148,27 +147,6 @@ public class SimpleFileDownloader implements FileDownloader {
         log.debug("Set last modified of '{}' to '{}'", file, lastModified);
         Files.setLastModifiedTime(file, FileTime.fromMillis(lastModified));
 
-        validateDownload(fileUrl, file);
-
         return file;
     }
-
-    /**
-     * Succeeds if downloaded file exists and has size &gt; 0.
-     * <p>Override this method to provide your own validation rules such as content length matching or checksum checking etc</p>.
-     *
-     * @param originalUrl the source from which the file was downloaded
-     * @param downloadedFile the path to the downloaded file
-     * @throws PluginException if the validation failed
-     */
-    protected void validateDownload(URL originalUrl, Path downloadedFile) throws PluginException {
-        try {
-            if (Files.isRegularFile(downloadedFile) && Files.size(downloadedFile) > 0) {
-                return;
-            }
-        } catch (IOException e) { /* Fallthrough */ }
-
-        throw new PluginException("Failed downloading file {}", downloadedFile);
-    }
-
 }

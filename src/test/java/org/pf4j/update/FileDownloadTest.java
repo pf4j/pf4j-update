@@ -84,15 +84,4 @@ public class FileDownloadTest {
     public void unsupportedProtocol() throws Exception {
         downloader.downloadFile(new URL("jar:file:!/myfile.jar"));
     }
-
-    @Test(expected = PluginException.class)
-    public void emptyFileDownloaded() throws Exception {
-        downloader.validateDownload(null, emptyFile);
-    }
-
-    @Test(expected = PluginException.class)
-    public void notRegularFile() throws Exception {
-        downloader.validateDownload(null, updateRepoDir);
-    }
-
 }

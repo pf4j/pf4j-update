@@ -45,6 +45,7 @@
         <pf4j.version>2.2.0</pf4j.version>
         <slf4j.version>1.7.5</slf4j.version>
         <gson.version>2.2.4</gson.version>
+        <commons-codec.version>1.10</commons-codec.version>
         <jetty.version>8.1.10.v20130312</jetty.version>
 
         <junit.version>4.12</junit.version>
@@ -158,6 +159,12 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons-codec.version}</version>
         </dependency>
 
         <!-- Test dependencies -->
