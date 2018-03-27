@@ -23,14 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 
-import static org.junit.Assert.*;
-
 public class FileVerifiersTest {
-  @Test
-  public void replaceSuffix() {
-    assertEquals("http://foo.com/my/file.sha512", FileVerifiers.VerifierUtils.replaceSuffix("http://foo.com/my/file.zip", ".sha512"));
-  }
-
   @Test
   public void testSha512Verifier() throws IOException, VerifyException {
     FileVerifier fileVerifier = new FileVerifiers.Sha512SumVerifier();
