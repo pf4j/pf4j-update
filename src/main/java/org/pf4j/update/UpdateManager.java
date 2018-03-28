@@ -23,6 +23,7 @@ import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
 import org.pf4j.VersionManager;
 import org.pf4j.update.PluginInfo.PluginRelease;
+import org.pf4j.update.verifier.CompoundVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -259,20 +260,10 @@ public class UpdateManager {
         try {
             PluginRelease release = findReleaseForPlugin(id, version);
             Path downloaded = getFileDownloader(id).downloadFile(new URL(release.url));
-            verifyFile(id, release, downloaded);
+            getFileVerifier(id).verify(new FileVerifier.Context(id, release), downloaded);
             return downloaded;
         } catch (IOException e) {
             throw new PluginException(e, "Error during download of plugin {}", id);
-        }
-    }
-
-    /**
-     * Verifies download using all configured {@link FileVerifier}s
-     */
-    private void verifyFile(String id, PluginRelease release, Path downloaded) throws VerifyException, IOException {
-        for (FileVerifier verifier : getFileVerifiers(id)) {
-            log.debug("Verifying plugin id {}, release {}, path {}", id, release, downloaded);
-            verifier.verify(new FileVerifier.Context(id, release), downloaded);
         }
     }
 
@@ -293,19 +284,20 @@ public class UpdateManager {
     }
 
     /**
-     * Finds the {@link FileDownloader} to use for this repository.
+     * Gets a file verifier to use for this plugin. First tries to use custom verifier
+     * configured for the repository, then fallback to the default CompoundVerifier
      *
      * @param pluginId the plugin we wish to download
-     * @return FileDownloader instance
+     * @return FileVerifier instance
      */
-    protected List<FileVerifier> getFileVerifiers(String pluginId) {
+    protected FileVerifier getFileVerifier(String pluginId) {
         for (UpdateRepository ur : repositories) {
-            if (ur.getPlugin(pluginId) != null && ur.getFileVerfiers() != null) {
-                return ur.getFileVerfiers();
+            if (ur.getPlugin(pluginId) != null && ur.getFileVerfier() != null) {
+                return ur.getFileVerfier();
             }
         }
 
-        return FileVerifiers.ALL_DEFAULT_FILE_VERIFIERS;
+        return new CompoundVerifier();
     }
 
     /**

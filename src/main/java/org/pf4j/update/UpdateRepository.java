@@ -64,8 +64,9 @@ public interface UpdateRepository {
     FileDownloader getFileDownloader();
 
     /**
-     * Gets a list of file verifiers to execute on the downloaded file for it to be claimed valid
-     * @return list of {@link FileVerifier}s
+     * Gets a file verifier to execute on the downloaded file for it to be claimed valid.
+     * May be a CompoundVerifier in order to chain several verifiers.
+     * @return {@link FileVerifier}
      */
-    List<FileVerifier> getFileVerfiers();
+    FileVerifier getFileVerfier();
 }

@@ -40,13 +40,13 @@ public interface FileVerifier {
      * Context to be passed to file verifiers
      */
     class Context {
-        String id;
-        Date date;
-        String version;
-        String requires;
-        String url;
-        String sha512sum;
-        Map<String,Object> meta = new HashMap<>();
+        public String id;
+        public Date date;
+        public String version;
+        public String requires;
+        public String url;
+        public String sha512sum;
+        public Map<String,Object> meta = new HashMap<>();
 
         public Context(String id, PluginInfo.PluginRelease pluginRelease) {
             this.id = id;

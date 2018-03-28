@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.pf4j.update.PluginInfo.PluginRelease;
 import org.pf4j.update.util.LenientDateTypeAdapter;
+import org.pf4j.update.verifier.CompoundVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,13 +123,13 @@ public class DefaultUpdateRepository implements UpdateRepository {
     }
 
     /**
-     * Gets a list of file verifiers to execute on the downloaded file for it to be claimed valid
-     *
+     * Gets a file verifier to execute on the downloaded file for it to be claimed valid.
+     * May be a CompoundVerifier in order to chain several verifiers.
      * @return list of {@link FileVerifier}s
      */
     @Override
-    public List<FileVerifier> getFileVerfiers() {
-        return FileVerifiers.ALL_DEFAULT_FILE_VERIFIERS;
+    public FileVerifier getFileVerfier() {
+        return new CompoundVerifier();
     }
 
     public String getPluginsJsonFileName() {
