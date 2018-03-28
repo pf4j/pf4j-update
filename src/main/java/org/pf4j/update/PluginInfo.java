@@ -43,7 +43,7 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     private String repositoryId;
 
     // Cache lastRelease per system version
-    private Map<String, PluginRelease> lastRelease = new HashMap<>();
+    transient private Map<String, PluginRelease> lastRelease = new HashMap<>();
 
     /**
      * Returns the last release version of this plugin for given system version, regardless of release date.
@@ -94,13 +94,48 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
         this.repositoryId = repositoryId;
     }
 
+    @Override
+    public String toString() {
+        return "PluginInfo{" +
+            "id='" + id + '\'' +
+            ", name='" + name + '\'' +
+            ", description='" + description + '\'' +
+            ", provider='" + provider + '\'' +
+            ", projectUrl='" + projectUrl + '\'' +
+            ", releases=" + releases +
+            ", repositoryId='" + repositoryId + '\'' +
+            '}';
+    }
+
+    /**
+     * A concrete release
+     */
     public static class PluginRelease implements Serializable {
 
         public String version;
         public Date date;
         public String requires;
         public String url;
+        /**
+         * Optional sha512 digest checksum. Can be one of
+         * <ul>
+         *   <li>&lt;sha512 sum string&gt;</li>
+         *   <li>URL to an external sha512 file</li>
+         *   <li>".sha512" as a shortcut for saying download a &lt;filename&gt;.sha512 file next to the zip/jar file</li>
+         * </ul>
+         */
+        public String sha512sum;
 
+        @Override
+        public String toString() {
+            return "PluginRelease{" +
+                "version='" + version + '\'' +
+                ", date=" + date +
+                ", requires='" + requires + '\'' +
+                ", url='" + url + '\'' +
+                ", sha512sum='" + sha512sum + '\'' +
+                '}';
+        }
     }
 
 }

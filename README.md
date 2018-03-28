@@ -3,7 +3,7 @@ PF4J - Update
 [![Travis CI Build Status](https://travis-ci.org/pf4j/pf4j-update.png)](https://travis-ci.org/pf4j/pf4j-update)
 [![Maven Central](http://img.shields.io/maven-central/v/org.pf4j/pf4j-update.svg)](http://search.maven.org/#search|ga|1|pf4j-update)
 
-The goal of this project is to supply an update mechanism for [PF4J](https://github.com/pf4j/pf4j).  
+The goal of this project is to supply an update mechanism for [PF4J](https://github.com/pf4j/pf4j).
 It's an open source (Apache license) lightweight (around 15KB) extension for PF4J, with minimal dependencies (only pf4j and gson).
 
 Components
@@ -13,6 +13,7 @@ Components
 - **PluginInfo** defines the plugin information for each repository's plugin
 - **PluginRelease** defines a plugin release
 - **FileDownloader** defines a pluggable way of downloading from a repository
+- **FileVerifier** defines a pluggable way of verifying downloaded files, e.g. checksum verification
 
 Using Maven
 -------------------
@@ -109,7 +110,7 @@ Below I defined two repository: localhost and folder.
 ]
 ```
 
-Each repository has an unique id and an url.
+Each repository has a unique id and a URL.
 
 In the root of this project you have a `repositories.json` file used by
 the test applications.
@@ -128,8 +129,9 @@ of `repositories.json` if you want it to live somewhere else.
 
 If you need even more control, `UpdateManager` accepts repositories in
 constructor and through setters.
-Implement your own UpdateRepository implementation and FileDownloaders to handle
-your own custom repsitory structures, authentication, checksum verifications etc.
+Implement your own `UpdateRepository`, `FileDownloader` and `FileVerifier`s
+to handle your own custom repsitory structures, authentication, checksum
+verifications etc.
 
 ### Subclass UpdateManager
 For full control, subclass `UpdateManager` and override relevant methods.
@@ -138,6 +140,7 @@ Repository structure
 -------------------
 Each repository exposes multiple plugins using a `plugins.json` file.  
 Below I registered two plugins: _welcome-plugin_ and _hello-plugin_.
+
 ```json
 [
   {
@@ -194,6 +197,7 @@ Below I registered two plugins: _welcome-plugin_ and _hello-plugin_.
 |date        |date         |Release date, ISO8601 or `yyyy-MM-dd` format |
 |requires    |Expression   |[SemVer expression](https://github.com/zafarkhaja/jsemver#semver-expressions-api-ranges), e.g. ">=2.0.0"  |
 |url         |URL-string   |Link to zip, either absolute or relative URL |
+|sha512sum   |&lt;sha512-digest&gt;<br/>*or* &lt;hash-file URL&gt;<br/>*or* ".sha512" |String with SHA-512 HEX digest of file content<br/>URL to file with SHA-512 string<br/>Fetch SHA-512 file next to plugin, with `.sha512` file suffix  |
 
 
 *New properties may appear in the future.*
@@ -218,7 +222,7 @@ Resulting `UpdateRepository.PluginRelease.url`: `http://localhost:8081/pf4j-demo
 In the _downloads_ folder of the project you have a repository (plugins.json and artifacts - plugins archives) used by the test applications.
 The structure of the repository is:
 
-- plugin1  
+- plugin1
     - 0.8.0  
         - plugin1.zip  
     - 0.9.0  

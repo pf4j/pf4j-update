@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.pf4j.update.PluginInfo.PluginRelease;
 import org.pf4j.update.util.LenientDateTypeAdapter;
+import org.pf4j.update.verifier.CompoundVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +27,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The default implementation of {@link UpdateRepository}.
@@ -39,7 +37,6 @@ import java.util.Map;
 public class DefaultUpdateRepository implements UpdateRepository {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
-
     private String id;
     private URL url;
     private String pluginsJsonFileName;
@@ -123,6 +120,16 @@ public class DefaultUpdateRepository implements UpdateRepository {
     @Override
     public FileDownloader getFileDownloader() {
         return new SimpleFileDownloader();
+    }
+
+    /**
+     * Gets a file verifier to execute on the downloaded file for it to be claimed valid.
+     * May be a CompoundVerifier in order to chain several verifiers.
+     * @return list of {@link FileVerifier}s
+     */
+    @Override
+    public FileVerifier getFileVerfier() {
+        return new CompoundVerifier();
     }
 
     public String getPluginsJsonFileName() {

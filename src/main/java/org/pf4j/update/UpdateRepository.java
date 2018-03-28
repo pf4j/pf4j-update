@@ -16,6 +16,7 @@
 package org.pf4j.update;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,4 +63,10 @@ public interface UpdateRepository {
      */
     FileDownloader getFileDownloader();
 
+    /**
+     * Gets a file verifier to execute on the downloaded file for it to be claimed valid.
+     * May be a CompoundVerifier in order to chain several verifiers.
+     * @return {@link FileVerifier}
+     */
+    FileVerifier getFileVerfier();
 }

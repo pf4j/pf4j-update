@@ -16,6 +16,7 @@
 package org.pf4j.update;
 
 import com.google.gson.GsonBuilder;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.pf4j.PluginException;
@@ -25,6 +26,8 @@ import org.pf4j.TestPluginDescriptor;
 import org.pf4j.VersionManager;
 import org.pf4j.update.util.NopPlugin;
 import org.pf4j.update.util.PropertiesPluginManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -53,6 +56,7 @@ import static org.junit.Assert.*;
  * Test downloads etc
  */
 public class InstallAndDownloadTest {
+    private static final Logger log = LoggerFactory.getLogger(InstallAndDownloadTest.class);
 
     private Path downloadRepoDir;
     private Path pluginFolderDir;
@@ -90,18 +94,18 @@ public class InstallAndDownloadTest {
 
         versionManager = pluginManager.getVersionManager();
 
-        Path pluginsJson = downloadRepoDir.resolve("plugins.json");
-        BufferedWriter writer = Files.newBufferedWriter(pluginsJson, Charset.defaultCharset(), StandardOpenOption.CREATE_NEW);
-        String jsonForPlugins = getJsonForPlugins(p1, p2, p3, p4, p5);
-        writer.write(jsonForPlugins);
-        writer.close();
-
         repoUrl = new URL("file:" + downloadRepoDir.toAbsolutePath().toString() + "/");
         UpdateRepository local = new DefaultUpdateRepository("local", repoUrl);
         p1.create();
         p2.create();
         p3.create();
         p5.create();
+
+        Path pluginsJson = downloadRepoDir.resolve("plugins.json");
+        BufferedWriter writer = Files.newBufferedWriter(pluginsJson, Charset.defaultCharset(), StandardOpenOption.CREATE_NEW);
+        String jsonForPlugins = getJsonForPlugins(p1, p2, p3, p4, p5);
+        writer.write(jsonForPlugins);
+        writer.close();
 
         updateManager = new UpdateManager(pluginManager, Collections.singletonList(local));
     }
@@ -230,12 +234,22 @@ public class InstallAndDownloadTest {
                 br.write("plugin.class=" + NopPlugin.class.getName());
                 br.close();
                 Files.move(propsFile, propsInZip);
+                zipfs.close();
             }
         }
 
+        public String getSha512() {
+            try {
+                String checksum = DigestUtils.sha512Hex(Files.newInputStream(updateRepoZipFile));
+                log.debug("Generated SHA sum for file: {} ", checksum);
+                return checksum;
+            } catch (IOException e) {
+                return null;
+            }
+        }
     }
 
-    private String getJsonForPlugins(MockZipPlugin... plugins) {
+    private String getJsonForPlugins(MockZipPlugin... plugins) throws IOException {
         GsonBuilder gsonBuilder = new GsonBuilder();
         Map<String, List<MockZipPlugin>> pluginMap = new HashMap<>();
         for (MockZipPlugin p : plugins) {
@@ -259,6 +273,7 @@ public class InstallAndDownloadTest {
                 releaseInfo.put("version", p.version);
                 releaseInfo.put("url", p.zipname);
                 releaseInfo.put("date", p.dateStr);
+                releaseInfo.put("sha512sum", p.getSha512());
                 releases.add(releaseInfo);
             }
             info.put("releases", releases);
