@@ -15,11 +15,10 @@
  */
 package org.pf4j.update;
 
-import org.pf4j.VersionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -46,8 +45,6 @@ public class UpdateTest {
 
         // create plugin manager
         PluginManager pluginManager = new DefaultPluginManager();
-        VersionManager versionManager = pluginManager.getVersionManager();
-        String systemVersion = pluginManager.getSystemVersion();
         pluginManager.loadPlugins();
 
         // create update manager
@@ -62,7 +59,7 @@ public class UpdateTest {
             log.debug("Found {} updates", updates.size());
             for (PluginInfo plugin : updates) {
                 log.debug("Found update for plugin '{}'", plugin.id);
-                PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion, versionManager);
+                PluginInfo.PluginRelease lastRelease = updateManager.getLastPluginRelease(plugin.id);
                 String lastVersion = lastRelease.version;
                 String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion();
                 log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
@@ -84,7 +81,7 @@ public class UpdateTest {
             log.debug("Found {} available plugins", availablePlugins.size());
             for (PluginInfo plugin : availablePlugins) {
                 log.debug("Found available plugin '{}'", plugin.id);
-                PluginInfo.PluginRelease lastRelease = plugin.getLastRelease(systemVersion, versionManager);
+                PluginInfo.PluginRelease lastRelease = updateManager.getLastPluginRelease(plugin.id);
                 String lastVersion = lastRelease.version;
                 log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
                 boolean installed = updateManager.installPlugin(plugin.id, lastVersion);

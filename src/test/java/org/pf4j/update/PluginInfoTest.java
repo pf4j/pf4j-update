@@ -17,8 +17,6 @@ package org.pf4j.update;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.pf4j.DefaultVersionManager;
-import org.pf4j.VersionManager;
 import org.pf4j.update.PluginInfo.PluginRelease;
 
 import java.util.Arrays;
@@ -33,7 +31,6 @@ public class PluginInfoTest {
 
     private PluginInfo pi1;
     private PluginInfo pi2;
-    private VersionManager versionManager;
 
     @Before
     public void setup() {
@@ -54,33 +51,11 @@ public class PluginInfoTest {
         pi2r1.version = "1.0.0";
         pi2.id = "aaa";
         pi2.releases = Collections.singletonList(pi2r1);
-
-        versionManager = new DefaultVersionManager();
     }
 
     @Test
     public void comparePluginInfo() {
         assertTrue(pi1.compareTo(pi2) > 0);
-    }
-
-    @Test
-    public void getLastRelease() {
-        assertEquals("1.0.0", pi1.getLastRelease("2.0.1", versionManager).version);
-        assertEquals("1.0.0", pi1.getLastRelease("2.5.0", versionManager).version);
-        assertEquals("1.1.0", pi1.getLastRelease("2.1.8", versionManager).version);
-        assertEquals("1.2.0", pi1.getLastRelease("3.0.0", versionManager).version);
-        assertEquals("1.2.0", pi1.getLastRelease("0.0.0", versionManager).version);
-        assertEquals(null, pi1.getLastRelease("4.0.0", versionManager));
-    }
-
-    @Test
-    public void hasUpdate() {
-        assertTrue(pi1.hasUpdate("3.0.0", "1.1.0", versionManager));
-        assertFalse(pi1.hasUpdate("2.3.0", "1.1.0", versionManager));
-
-        // There are no versions certified for System version 5, so no updates either.
-        // In this case, the installed plugin will be disabled by pf4j
-        assertFalse(pi1.hasUpdate("5.0.0", "1.0.0", versionManager));
     }
 
 }

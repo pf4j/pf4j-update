@@ -15,22 +15,14 @@
  */
 package org.pf4j.update;
 
-import org.pf4j.VersionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * {@code PluginInfo} describing a plugin from a repository.
  */
 public class PluginInfo implements Serializable, Comparable<PluginInfo> {
-
-    private static final Logger log = LoggerFactory.getLogger(PluginInfo.class);
 
     public String id;
     public String name;
@@ -42,44 +34,6 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     // This is metadata added at parse time, not part of the published plugins.json
     private String repositoryId;
 
-    // Cache lastRelease per system version
-    transient private Map<String, PluginRelease> lastRelease = new HashMap<>();
-
-    /**
-     * Returns the last release version of this plugin for given system version, regardless of release date.
-     *
-     * @param systemVersion version of host system where plugin will be installed
-     * @return PluginRelease which has the highest version number
-     */
-    public PluginRelease getLastRelease(String systemVersion, VersionManager versionManager) {
-        if (!lastRelease.containsKey(systemVersion)) {
-            for (PluginRelease release : releases) {
-                if (systemVersion.equals("0.0.0") || versionManager.checkVersionConstraint(systemVersion, release.requires)) {
-                    if (lastRelease.get(systemVersion) == null) {
-                        lastRelease.put(systemVersion, release);
-                    } else if (versionManager.compareVersions(release.version, lastRelease.get(systemVersion).version) > 0) {
-                        lastRelease.put(systemVersion, release);
-                    }
-                }
-            }
-        }
-
-        return lastRelease.get(systemVersion);
-    }
-
-    /**
-     * Finds whether the newer version of the plugin.
-     *
-     * @param systemVersion version of host system where plugin will be installed
-     * @param installedVersion version that is already installed
-     * @param versionManager version manager
-     * @return true if there is a newer version available which is compatible with system
-     */
-    public boolean hasUpdate(String systemVersion, String installedVersion, VersionManager versionManager) {
-        PluginRelease last = getLastRelease(systemVersion, versionManager);
-        return last != null && versionManager.compareVersions(last.version, installedVersion) > 0;
-
-    }
 
     @Override
     public int compareTo(PluginInfo o) {
@@ -108,7 +62,7 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     }
 
     /**
-     * A concrete release
+     * A concrete release.
      */
     public static class PluginRelease implements Serializable {
 

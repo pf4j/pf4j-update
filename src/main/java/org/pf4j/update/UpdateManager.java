@@ -47,6 +47,9 @@ public class UpdateManager {
     private String systemVersion;
     private Path repositoriesJson;
 
+    // cache last plugin release per plugin id (the key)
+    private Map<String, PluginRelease> lastPluginRelease = new HashMap<>();
+
     protected List<UpdateRepository> repositories;
 
     public UpdateManager(PluginManager pluginManager) {
@@ -97,14 +100,10 @@ public class UpdateManager {
      */
     public List<PluginInfo> getUpdates() {
         List<PluginInfo> updates = new ArrayList<>();
-        Map<String, PluginInfo> pluginMap = getPluginsMap();
         for (PluginWrapper installed : pluginManager.getPlugins()) {
-            PluginInfo pluginFromRepo = pluginMap.get(installed.getPluginId());
-            if (pluginFromRepo != null) {
-                String installedVersion = installed.getDescriptor().getVersion();
-                if (pluginFromRepo.hasUpdate(systemVersion, installedVersion, versionManager)) {
-                    updates.add(pluginFromRepo);
-                }
+            String pluginId = installed.getPluginId();
+            if (hasPluginUpdate(pluginId)) {
+                updates.add(getPluginsMap().get(pluginId));
             }
         }
 
@@ -309,17 +308,17 @@ public class UpdateManager {
      * @throws PluginException if id or version does not exist
      */
     protected PluginRelease findReleaseForPlugin(String id, String version) throws PluginException {
-        PluginInfo plugin = getPluginsMap().get(id);
-        if (plugin == null) {
+        PluginInfo pluginInfo = getPluginsMap().get(id);
+        if (pluginInfo == null) {
             log.info("Plugin with id {} does not exist in any repository", id);
             throw new PluginException("Plugin with id {} not found in any repository", id);
         }
 
         if (version == null) {
-            return plugin.getLastRelease(systemVersion, versionManager);
+            return getLastPluginRelease(id);
         }
 
-        for (PluginRelease release : plugin.releases) {
+        for (PluginRelease release : pluginInfo.releases) {
             if (versionManager.compareVersions(version, release.version) == 0 && release.url != null) {
                 return release;
             }
@@ -341,13 +340,12 @@ public class UpdateManager {
             throw new PluginException("Plugin {} cannot be updated since it is not installed", id);
         }
 
-        PluginInfo pi = getPluginsMap().get(id);
-        if (pi == null) {
+        PluginInfo pluginInfo = getPluginsMap().get(id);
+        if (pluginInfo == null) {
             throw new PluginException("Plugin {} does not exist in any repository", id);
         }
 
-        String installedVersion = pluginManager.getPlugin(id).getDescriptor().getVersion();
-        if (!pi.hasUpdate(systemVersion, installedVersion, versionManager)) {
+        if (!hasPluginUpdate(id)) {
             log.warn("Plugin {} does not have an update available which is compatible with system version", id, systemVersion);
             return false;
         }
@@ -375,6 +373,49 @@ public class UpdateManager {
 
     public boolean uninstallPlugin(String id) {
         return pluginManager.deletePlugin(id);
+    }
+
+    /**
+     * Returns the last release version of this plugin for given system version, regardless of release date.
+     *
+     * @return PluginRelease which has the highest version number
+     */
+    public PluginRelease getLastPluginRelease(String id) {
+        PluginInfo pluginInfo = getPluginsMap().get(id);
+        if (pluginInfo == null) {
+            return null;
+        }
+
+        if (!lastPluginRelease.containsKey(id)) {
+            for (PluginRelease release : pluginInfo.releases) {
+                if (systemVersion.equals("0.0.0") || versionManager.checkVersionConstraint(systemVersion, release.requires)) {
+                    if (lastPluginRelease.get(id) == null) {
+                        lastPluginRelease.put(id, release);
+                    } else if (versionManager.compareVersions(release.version, lastPluginRelease.get(id).version) > 0) {
+                        lastPluginRelease.put(id, release);
+                    }
+                }
+            }
+        }
+
+        return lastPluginRelease.get(id);
+    }
+
+    /**
+     * Finds whether the newer version of the plugin.
+     *
+     * @return true if there is a newer version available which is compatible with system
+     */
+    public boolean hasPluginUpdate(String id) {
+        PluginInfo pluginInfo = getPluginsMap().get(id);
+        if (pluginInfo == null) {
+            return false;
+        }
+
+        String installedVersion = pluginManager.getPlugin(id).getDescriptor().getVersion();
+        PluginRelease last = getLastPluginRelease(id);
+
+        return last != null && versionManager.compareVersions(last.version, installedVersion) > 0;
     }
 
     protected synchronized void initRepositoriesFromJson() {
