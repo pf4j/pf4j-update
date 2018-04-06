@@ -33,7 +33,8 @@ You may want to check for the latest released version using [Maven Search](http:
 
 How to use
 -------------------
-It's very simple to add pf4j-update in your application:
+It's very simple to add pf4j-update in your application.
+The whole code of below snippet is available on [Github](https://github.com/pf4j/pf4j-update/blob/master/src/test/java/org/pf4j/update/UpdateTest.java). 
 
 ```java
 public static void main(String[] args) {
@@ -41,34 +42,59 @@ public static void main(String[] args) {
     
     // create plugin manager
     PluginManager pluginManager = new DefaultPluginManager();
-
-    // >> keep system up-to-date <<
-    Version systemVersion = Version.valueOf("1.2.3");
-    pluginManager.setSystemVersion(systemVersion);
     pluginManager.loadPlugins();
 
     // create update manager
     UpdateManager updateManager = new UpdateManager(pluginManager);
 
+    // >> keep system up-to-date <<
+    boolean systemUpToDate = true;
+
     // check for updates
     if (updateManager.hasUpdates()) {
-        List<UpdateRepository.PluginInfo> updates = updateManager.getUpdates();
-        for (UpdateRepository.PluginInfo plugin : updates) {
-            UpdateRepository.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
+        List<PluginInfo> updates = updateManager.getUpdates();
+        log.debug("Found {} updates", updates.size());
+        for (PluginInfo plugin : updates) {
+            log.debug("Found update for plugin '{}'", plugin.id);
+            PluginInfo.PluginRelease lastRelease = updateManager.getLastPluginRelease(plugin.id);
             String lastVersion = lastRelease.version;
-            String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion().toString();
-            updateManager.updatePlugin(plugin.id, lastRelease.url);
+            String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion();
+            log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
+            boolean updated = updateManager.updatePlugin(plugin.id, lastVersion);
+            if (updated) {
+                log.debug("Updated plugin '{}'", plugin.id);
+            } else {
+                log.error("Cannot update plugin '{}'", plugin.id);
+                systemUpToDate = false;
+            }
         }
+    } else {
+        log.debug("No updates found");
     }
-    
+
     // check for available (new) plugins
     if (updateManager.hasAvailablePlugins()) {
-        List<UpdateRepository.PluginInfo> availablePlugins = updateManager.getAvailablePlugins();
-        for (UpdateRepository.PluginInfo plugin : availablePlugins) {
-            UpdateRepository.PluginRelease lastRelease = plugin.getLastRelease(systemVersion);
+        List<PluginInfo> availablePlugins = updateManager.getAvailablePlugins();
+        log.debug("Found {} available plugins", availablePlugins.size());
+        for (PluginInfo plugin : availablePlugins) {
+            log.debug("Found available plugin '{}'", plugin.id);
+            PluginInfo.PluginRelease lastRelease = updateManager.getLastPluginRelease(plugin.id);
             String lastVersion = lastRelease.version;
-            updateManager.installPlugin(lastRelease.url);
+            log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
+            boolean installed = updateManager.installPlugin(plugin.id, lastVersion);
+            if (installed) {
+                log.debug("Installed plugin '{}'", plugin.id);
+            } else {
+                log.error("Cannot install plugin '{}'", plugin.id);
+                systemUpToDate = false;
+            }
         }
+    } else {
+        log.debug("No available plugins found");
+    }
+
+    if (systemUpToDate) {
+        log.debug("System up-to-date");
     }
 
     ...
@@ -243,7 +269,7 @@ Much of the conversation between developers and users is managed through [mailin
 
 Versioning
 ------------
-PF4J will be maintained under the Semantic Versioning guidelines as much as possible.
+This project will be maintained under the Semantic Versioning guidelines as much as possible.
 
 Releases will be numbered with the follow format:
 
