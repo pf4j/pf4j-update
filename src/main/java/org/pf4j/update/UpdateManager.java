@@ -218,6 +218,7 @@ public class UpdateManager {
         for (UpdateRepository updateRepository : repositories) {
             updateRepository.refresh();
         }
+        lastPluginRelease.clear();
     }
 
     /**
