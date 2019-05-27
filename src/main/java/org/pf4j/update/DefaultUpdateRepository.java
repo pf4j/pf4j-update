@@ -36,6 +36,7 @@ import java.util.*;
  */
 public class DefaultUpdateRepository implements UpdateRepository {
 
+    private static final String DEFAULT_PLUGINS_JSON_FILENAME = "plugins.json";
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
     private String id;
     private URL url;
@@ -43,14 +44,23 @@ public class DefaultUpdateRepository implements UpdateRepository {
 
     private Map<String, PluginInfo> plugins;
 
+    /**
+     * Instantiates a new default update repository. The default plugins JSON file
+     * name {@code plugins.json} will be used. Please use
+     * {@link #DefaultUpdateRepository(String, URL, String)} if you want to choose
+     * another file name than {@code plugins.json}}.
+     *
+     * @param id  the repository id
+     * @param url the repository url
+     */
     public DefaultUpdateRepository(String id, URL url) {
-        this(id, url, "plugins.json");
+        this(id, url, DEFAULT_PLUGINS_JSON_FILENAME);
     }
 
     public DefaultUpdateRepository(String id, URL url, String pluginsJsonFileName) {
-        this.id = id;
-        this.url = url;
-        this.pluginsJsonFileName = pluginsJsonFileName;
+	this.id = id;
+	this.url = url;
+	this.pluginsJsonFileName = pluginsJsonFileName;
     }
 
     @Override
@@ -80,7 +90,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     private void initPlugins() {
         Reader pluginsJsonReader;
         try {
-            URL pluginsUrl = new URL(getUrl(), pluginsJsonFileName);
+            URL pluginsUrl = new URL(getUrl(), getPluginsJsonFileName());
             log.debug("Read plugins of '{}' repository from '{}'", id, pluginsUrl);
             pluginsJsonReader = new InputStreamReader(pluginsUrl.openStream());
         } catch (Exception e) {
@@ -132,14 +142,23 @@ public class DefaultUpdateRepository implements UpdateRepository {
         return new CompoundVerifier();
     }
 
+    /**
+     * Gets the plugins json file name. Returns {@code plugins.json} if null.
+     *
+     * @return the plugins json file name
+     */
     public String getPluginsJsonFileName() {
+        if (pluginsJsonFileName == null) {
+            pluginsJsonFileName = DEFAULT_PLUGINS_JSON_FILENAME;
+        }
         return pluginsJsonFileName;
     }
 
     /**
      * Choose another file name than {@code plugins.json}.
      *
-     * @param pluginsJsonFileName the name (relative) of plugins.json file
+     * @param pluginsJsonFileName the name (relative) of plugins.json file. If null,
+     *                            will default to {@code plugins.json}
      */
     public void setPluginsJsonFileName(String pluginsJsonFileName) {
         this.pluginsJsonFileName = pluginsJsonFileName;
