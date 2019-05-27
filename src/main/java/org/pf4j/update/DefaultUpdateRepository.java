@@ -38,6 +38,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
 
     private static final String DEFAULT_PLUGINS_JSON_FILENAME = "plugins.json";
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
+
     private String id;
     private URL url;
     private String pluginsJsonFileName;
@@ -151,14 +152,15 @@ public class DefaultUpdateRepository implements UpdateRepository {
         if (pluginsJsonFileName == null) {
             pluginsJsonFileName = DEFAULT_PLUGINS_JSON_FILENAME;
         }
+
         return pluginsJsonFileName;
     }
 
     /**
      * Choose another file name than {@code plugins.json}.
      *
-     * @param pluginsJsonFileName the name (relative) of plugins.json file. If null,
-     *                            will default to {@code plugins.json}
+     * @param pluginsJsonFileName the name (relative) of plugins.json file. 
+	 * If null, will default to {@code plugins.json}
      */
     public void setPluginsJsonFileName(String pluginsJsonFileName) {
         this.pluginsJsonFileName = pluginsJsonFileName;
