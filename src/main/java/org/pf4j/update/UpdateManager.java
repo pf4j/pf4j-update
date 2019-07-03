@@ -169,7 +169,7 @@ public class UpdateManager {
     }
 
     /**
-     * Add one {@link DefaultUpdateRepository).
+     * Add one {@link DefaultUpdateRepository}.
      *
      * @param id of repo
      * @param url of repo

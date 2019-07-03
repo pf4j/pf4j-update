@@ -71,6 +71,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.0.1</version>
+                <configuration>
+                    <doclint>none</doclint>
+                    <failOnWarnings>false</failOnWarnings>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -177,15 +181,6 @@
     </dependencies>
 
     <profiles>
-        <profile>
-            <id>jdk8-build</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <properties>
-                <additionalparam>-Xdoclint:none</additionalparam>
-            </properties>
-        </profile>
         <profile>
             <id>travis</id>
             <activation>
