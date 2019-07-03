@@ -17,7 +17,7 @@ package org.pf4j.update;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.pf4j.PluginException;
+import org.pf4j.PluginRuntimeException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -27,7 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests file download
@@ -80,8 +81,9 @@ public class FileDownloadTest {
         assertEquals(downloadUrl.openConnection().getLastModified(), downloaded.toFile().lastModified());
     }
 
-    @Test(expected = PluginException.class)
+    @Test(expected = PluginRuntimeException.class)
     public void unsupportedProtocol() throws Exception {
         downloader.downloadFile(new URL("jar:file:!/myfile.jar"));
     }
+
 }

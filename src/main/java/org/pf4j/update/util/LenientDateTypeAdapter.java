@@ -36,11 +36,14 @@ import java.util.TimeZone;
  * Fork of com.google.gson.internal.bind.DateTypeAdapter
  */
 public class LenientDateTypeAdapter extends TypeAdapter<Date> {
+
     public static final TypeAdapterFactory FACTORY = new TypeAdapterFactory() {
+
         @SuppressWarnings("unchecked") // we use a runtime check to make sure the 'T's equal
         public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
             return typeToken.getRawType() == Date.class ? (TypeAdapter<T>) new LenientDateTypeAdapter() : null;
         }
+
     };
 
     private final DateFormat enUsFormat
@@ -97,7 +100,9 @@ public class LenientDateTypeAdapter extends TypeAdapter<Date> {
             out.nullValue();
             return;
         }
+
         String dateFormatAsString = enUsFormat.format(value);
         out.value(dateFormatAsString);
     }
+
 }

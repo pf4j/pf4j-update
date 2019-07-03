@@ -139,7 +139,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
      * @return list of {@link FileVerifier}s
      */
     @Override
-    public FileVerifier getFileVerfier() {
+    public FileVerifier getFileVerifier() {
         return new CompoundVerifier();
     }
 

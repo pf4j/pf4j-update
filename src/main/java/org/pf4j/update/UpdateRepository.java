@@ -16,7 +16,6 @@
 package org.pf4j.update;
 
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,5 +67,6 @@ public interface UpdateRepository {
      * May be a CompoundVerifier in order to chain several verifiers.
      * @return {@link FileVerifier}
      */
-    FileVerifier getFileVerfier();
+    FileVerifier getFileVerifier();
+
 }

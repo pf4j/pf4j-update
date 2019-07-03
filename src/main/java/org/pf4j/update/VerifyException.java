@@ -15,12 +15,13 @@
  */
 package org.pf4j.update;
 
-import org.pf4j.PluginException;
+import org.pf4j.PluginRuntimeException;
 
 /**
  * Marker exception for plugin verification failure
  */
-public class VerifyException extends PluginException {
+public class VerifyException extends PluginRuntimeException {
+
     public VerifyException(String message) {
         super(message);
     }
@@ -32,4 +33,5 @@ public class VerifyException extends PluginException {
     public VerifyException(String message, Object... args) {
         super(message, args);
     }
+
 }

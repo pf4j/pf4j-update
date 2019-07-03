@@ -23,11 +23,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Verifies that the file exists is a regular file and has a non-null size
+ * Verifies that the file exists is a regular file and has a non-null size.
  */
 public class BasicVerifier implements FileVerifier {
+
     /**
-     * Verifies a plugin release according to certain rules
+     * Verifies a plugin release according to certain rules.
      *
      * @param context the file verifier context object
      * @param file    the path to the downloaded file itself
@@ -40,4 +41,5 @@ public class BasicVerifier implements FileVerifier {
             throw new VerifyException("File {} is not a regular file or has size 0", file);
         }
     }
+
 }

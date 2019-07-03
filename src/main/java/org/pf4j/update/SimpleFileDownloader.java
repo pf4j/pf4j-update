@@ -15,7 +15,7 @@
  */
 package org.pf4j.update;
 
-import org.pf4j.PluginException;
+import org.pf4j.PluginRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,9 +49,9 @@ public class SimpleFileDownloader implements FileDownloader {
      * @param fileUrl the URI representing the file to download
      * @return the path of downloaded/copied file
      * @throws IOException in case of network or IO problems
-     * @throws PluginException in case of other problems
+     * @throws PluginRuntimeException in case of other problems
      */
-    public Path downloadFile(URL fileUrl) throws PluginException, IOException {
+    public Path downloadFile(URL fileUrl) throws IOException {
         switch (fileUrl.getProtocol()) {
             case "http":
             case "https":
@@ -60,7 +60,7 @@ public class SimpleFileDownloader implements FileDownloader {
             case "file":
                 return copyLocalFile(fileUrl);
             default:
-                throw new PluginException("URL protocol {} not supported", fileUrl.getProtocol());
+                throw new PluginRuntimeException("URL protocol {} not supported", fileUrl.getProtocol());
         }
     }
 
@@ -70,9 +70,9 @@ public class SimpleFileDownloader implements FileDownloader {
      * @param fileUrl source file
      * @return path of target file
      * @throws IOException if problems during copy
-     * @throws PluginException in case of other problems
+     * @throws PluginRuntimeException in case of other problems
      */
-    protected Path copyLocalFile(URL fileUrl) throws IOException, PluginException {
+    protected Path copyLocalFile(URL fileUrl) throws IOException {
         Path destination = Files.createTempDirectory("pf4j-update-downloader");
         destination.toFile().deleteOnExit();
 
@@ -85,7 +85,7 @@ public class SimpleFileDownloader implements FileDownloader {
 
             return toFile;
         } catch (URISyntaxException e) {
-            throw new PluginException("Something wrong with given URL", e);
+            throw new PluginRuntimeException("Something wrong with given URL", e);
         }
     }
 
@@ -95,9 +95,9 @@ public class SimpleFileDownloader implements FileDownloader {
      * @param fileUrl source file
      * @return path of downloaded file
      * @throws IOException if IO problems
-     * @throws PluginException if validation fails or any other problems
+     * @throws PluginRuntimeException if validation fails or any other problems
      */
-    protected Path downloadFileHttp(URL fileUrl) throws IOException, PluginException {
+    protected Path downloadFileHttp(URL fileUrl) throws IOException {
         Path destination = Files.createTempDirectory("pf4j-update-downloader");
         destination.toFile().deleteOnExit();
 
@@ -149,4 +149,5 @@ public class SimpleFileDownloader implements FileDownloader {
 
         return file;
     }
+
 }

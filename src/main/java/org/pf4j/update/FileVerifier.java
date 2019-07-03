@@ -40,6 +40,7 @@ public interface FileVerifier {
      * Context to be passed to file verifiers
      */
     class Context {
+
         public String id;
         public Date date;
         public String version;
@@ -65,5 +66,7 @@ public interface FileVerifier {
             this.url = url;
             this.sha512sum = sha512sum;
         }
+
     }
+
 }

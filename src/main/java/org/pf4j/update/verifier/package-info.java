@@ -17,7 +17,7 @@
 /** 
  * Implementations of {@link org.pf4j.update.FileVerifier} interface.
  * An verifier implementation will do a specific kind of check on the downloaded plugin file
- * in orer to verify that it is complete, safe, compliant or whatever needs to be verified.
+ * in order to verify that it is complete, safe, compliant or whatever needs to be verified.
  */
 package org.pf4j.update.verifier;
 

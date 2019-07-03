@@ -15,8 +15,6 @@
  */
 package org.pf4j.update;
 
-import org.pf4j.PluginException;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -34,7 +32,8 @@ public interface FileDownloader {
      * @param fileUrl the URL representing the file to download
      * @return Path of downloaded file, typically in a temporary folder
      * @throws IOException if there was an IO problem during download
-     * @throws PluginException in case of other problems, such as unsupported protocol
+     * @throws org.pf4j.PluginRuntimeException in case of other problems, such as unsupported protocol
      */
-    Path downloadFile(URL fileUrl) throws PluginException, IOException;
+    Path downloadFile(URL fileUrl) throws IOException;
+
 }

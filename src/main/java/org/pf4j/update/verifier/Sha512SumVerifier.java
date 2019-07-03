@@ -36,6 +36,7 @@ import java.nio.file.Path;
  * to S3 or other 3rd party download locations that could have been tampered with.
  */
 public class Sha512SumVerifier implements FileVerifier {
+
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     /**
@@ -82,4 +83,5 @@ public class Sha512SumVerifier implements FileVerifier {
             return reader.readLine();
         }
     }
+
 }

@@ -20,7 +20,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
 /**
  * @author Decebal Suiu
@@ -54,18 +53,13 @@ public class WebServer {
     }
 
     public void start() throws Exception {
-        Server server = new Server();
-
-        SelectChannelConnector connector = new SelectChannelConnector();
-        connector.setPort(port);
-        server.addConnector(connector);
+        Server server = new Server(port);
         server.setStopAtShutdown(true);
 
         ResourceHandler resourceHandler = new ResourceHandler();
         resourceHandler.setResourceBase(resourceBase);
         resourceHandler.setDirectoriesListed(true);
 
-//        server.setHandler(contextHandler);
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[] { resourceHandler, new DefaultHandler() });
         server.setHandler(handlers);

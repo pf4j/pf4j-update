@@ -19,8 +19,8 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.pf4j.PluginException;
 import org.pf4j.PluginManager;
+import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.TestPluginDescriptor;
 import org.pf4j.VersionManager;
@@ -50,12 +50,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test downloads etc
  */
 public class InstallAndDownloadTest {
+
     private static final Logger log = LoggerFactory.getLogger(InstallAndDownloadTest.class);
 
     private Path downloadRepoDir;
@@ -127,19 +130,19 @@ public class InstallAndDownloadTest {
     }
 
     @Test
-    public void install() throws Exception {
+    public void install() {
         assertFalse(Files.exists(pluginFolderDir.resolve(p3.zipname)));
         assertTrue(updateManager.installPlugin("other", "3.0.0"));
         assertTrue(Files.exists(pluginFolderDir.resolve(p3.zipname)));
     }
 
     @Test
-    public void installOldVersion() throws Exception {
+    public void installOldVersion() {
         assertTrue(updateManager.installPlugin("myPlugin", "1.2.3"));
     }
 
     @Test
-    public void update() throws Exception {
+    public void update() {
         assertTrue(updateManager.installPlugin("myPlugin", "1.2.3"));
         assertTrue(updateManager.hasUpdates());
         assertEquals(1, updateManager.getUpdates().size());
@@ -150,14 +153,14 @@ public class InstallAndDownloadTest {
         assertFalse(Files.exists(pluginFolderDir.resolve(p1.pluginRepoUnzippedFolder)));
     }
 
-    @Test(expected = PluginException.class)
-    public void updateVersionNotExist() throws Exception {
+    @Test(expected = PluginRuntimeException.class)
+    public void updateVersionNotExist() {
         assertTrue(updateManager.installPlugin("myPlugin", "1.2.3"));
         updateManager.updatePlugin("myPlugin", "9.9.9");
     }
 
     @Test
-    public void noUpdateAvailable() throws Exception {
+    public void noUpdateAvailable() {
         assertTrue(updateManager.installPlugin("myPlugin", null)); // Install latest
         assertFalse(updateManager.updatePlugin("myPlugin", null)); // Update to latest
     }
@@ -168,7 +171,7 @@ public class InstallAndDownloadTest {
     }
 
     @Test
-    public void uninstall() throws Exception {
+    public void uninstall() {
         updateManager.installPlugin("other", "3.0.0");
         assertTrue(updateManager.uninstallPlugin("other"));
     }
@@ -249,7 +252,7 @@ public class InstallAndDownloadTest {
         }
     }
 
-    private String getJsonForPlugins(MockZipPlugin... plugins) throws IOException {
+    private String getJsonForPlugins(MockZipPlugin... plugins) {
         GsonBuilder gsonBuilder = new GsonBuilder();
         Map<String, List<MockZipPlugin>> pluginMap = new HashMap<>();
         for (MockZipPlugin p : plugins) {

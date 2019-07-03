@@ -34,7 +34,6 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
     // This is metadata added at parse time, not part of the published plugins.json
     private String repositoryId;
 
-
     @Override
     public int compareTo(PluginInfo o) {
         return id.compareTo(o.id);
@@ -70,6 +69,7 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
         public Date date;
         public String requires;
         public String url;
+
         /**
          * Optional sha512 digest checksum. Can be one of
          * <ul>
@@ -90,6 +90,7 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
                 ", sha512sum='" + sha512sum + '\'' +
                 '}';
         }
+
     }
 
 }

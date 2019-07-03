@@ -29,12 +29,11 @@ public class UpdateTest {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateTest.class);
 
-    public static void main(String[] args) throws Exception {
-//        createTestRepositories();
+    public static void main(String[] args) {
         update();
     }
 
-    private static void update() throws Exception {
+    private static void update() {
         // start the web server that serves the repository's artifacts
         try {
             new WebServer().start();

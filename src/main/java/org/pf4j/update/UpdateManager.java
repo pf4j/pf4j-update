@@ -17,8 +17,8 @@ package org.pf4j.update;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.pf4j.PluginException;
 import org.pf4j.PluginManager;
+import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginState;
 import org.pf4j.PluginWrapper;
 import org.pf4j.VersionManager;
@@ -33,7 +33,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Decebal Suiu
@@ -69,7 +74,7 @@ public class UpdateManager {
     public UpdateManager(PluginManager pluginManager, List<UpdateRepository> repos) {
         this(pluginManager);
 
-        repositories = repos == null ? new ArrayList<UpdateRepository>() : repos;
+        repositories = repos == null ? new ArrayList<>() : repos;
     }
 
     public List<PluginInfo> getAvailablePlugins() {
@@ -227,9 +232,9 @@ public class UpdateManager {
      * @param id the id of plugin to install
      * @param version the version of plugin to install, on SemVer format, or null for latest
      * @return true if installation successful and plugin started
-     * @exception PluginException if plugin does not exist in repos or problems during
+     * @exception PluginRuntimeException if plugin does not exist in repos or problems during
      */
-    public synchronized boolean installPlugin(String id, String version) throws PluginException {
+    public synchronized boolean installPlugin(String id, String version) {
         // Download to temporary location
         Path downloaded = downloadPlugin(id, version);
 
@@ -238,7 +243,7 @@ public class UpdateManager {
         try {
             Files.move(downloaded, file);
         } catch (IOException e) {
-            throw new PluginException(e, "Failed to write file '{}' to plugins folder", file);
+            throw new PluginRuntimeException(e, "Failed to write file '{}' to plugins folder", file);
         }
 
         String pluginId = pluginManager.loadPlugin(file);
@@ -254,16 +259,16 @@ public class UpdateManager {
      * @param id of plugin
      * @param version of plugin or null to download latest
      * @return Path to file which will reside in a temporary folder in the system default temp area
-     * @throws PluginException if download failed
+     * @throws PluginRuntimeException if download failed
      */
-    protected Path downloadPlugin(String id, String version) throws PluginException {
+    protected Path downloadPlugin(String id, String version) {
         try {
             PluginRelease release = findReleaseForPlugin(id, version);
             Path downloaded = getFileDownloader(id).downloadFile(new URL(release.url));
             getFileVerifier(id).verify(new FileVerifier.Context(id, release), downloaded);
             return downloaded;
         } catch (IOException e) {
-            throw new PluginException(e, "Error during download of plugin {}", id);
+            throw new PluginRuntimeException(e, "Error during download of plugin {}", id);
         }
     }
 
@@ -285,15 +290,15 @@ public class UpdateManager {
 
     /**
      * Gets a file verifier to use for this plugin. First tries to use custom verifier
-     * configured for the repository, then fallback to the default CompoundVerifier
+     * configured for the repository, then fallback to the default {@link CompoundVerifier}
      *
      * @param pluginId the plugin we wish to download
      * @return FileVerifier instance
      */
     protected FileVerifier getFileVerifier(String pluginId) {
         for (UpdateRepository ur : repositories) {
-            if (ur.getPlugin(pluginId) != null && ur.getFileVerfier() != null) {
-                return ur.getFileVerfier();
+            if (ur.getPlugin(pluginId) != null && ur.getFileVerifier() != null) {
+                return ur.getFileVerifier();
             }
         }
 
@@ -306,13 +311,13 @@ public class UpdateManager {
      * @param id of plugin
      * @param version of plugin or null to locate latest version
      * @return PluginRelease for downloading
-     * @throws PluginException if id or version does not exist
+     * @throws PluginRuntimeException if id or version does not exist
      */
-    protected PluginRelease findReleaseForPlugin(String id, String version) throws PluginException {
+    protected PluginRelease findReleaseForPlugin(String id, String version) {
         PluginInfo pluginInfo = getPluginsMap().get(id);
         if (pluginInfo == null) {
             log.info("Plugin with id {} does not exist in any repository", id);
-            throw new PluginException("Plugin with id {} not found in any repository", id);
+            throw new PluginRuntimeException("Plugin with id {} not found in any repository", id);
         }
 
         if (version == null) {
@@ -325,7 +330,7 @@ public class UpdateManager {
             }
         }
 
-        throw new PluginException("Plugin {} with version @{} does not exist in the repository", id, version);
+        throw new PluginRuntimeException("Plugin {} with version @{} does not exist in the repository", id, version);
     }
 
     /**
@@ -334,20 +339,20 @@ public class UpdateManager {
      * @param id the id of plugin to update
      * @param version the version to update to, on SemVer format, or null for latest
      * @return true if update successful
-     * @exception PluginException in case the given version is not available, plugin id not already installed etc
+     * @exception PluginRuntimeException in case the given version is not available, plugin id not already installed etc
     */
-    public boolean updatePlugin(String id, String version) throws PluginException {
+    public boolean updatePlugin(String id, String version) {
         if (pluginManager.getPlugin(id) == null) {
-            throw new PluginException("Plugin {} cannot be updated since it is not installed", id);
+            throw new PluginRuntimeException("Plugin {} cannot be updated since it is not installed", id);
         }
 
         PluginInfo pluginInfo = getPluginsMap().get(id);
         if (pluginInfo == null) {
-            throw new PluginException("Plugin {} does not exist in any repository", id);
+            throw new PluginRuntimeException("Plugin {} does not exist in any repository", id);
         }
 
         if (!hasPluginUpdate(id)) {
-            log.warn("Plugin {} does not have an update available which is compatible with system version", id, systemVersion);
+            log.warn("Plugin {} does not have an update available which is compatible with system version {}", id, systemVersion);
             return false;
         }
 
@@ -363,7 +368,7 @@ public class UpdateManager {
         try {
             Files.move(downloaded, file);
         } catch (IOException e) {
-            throw new PluginException("Failed to write plugin file {} to plugin folder", file);
+            throw new PluginRuntimeException("Failed to write plugin file {} to plugin folder", file);
         }
 
         String newPluginId = pluginManager.loadPlugin(file);

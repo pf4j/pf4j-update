@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CompoundVerifier implements FileVerifier {
+
     /**
      * Default list of verifiers
      */
@@ -71,4 +72,5 @@ public class CompoundVerifier implements FileVerifier {
     public void setVerifiers(List<FileVerifier> verifiers) {
         this.verifiers = verifiers;
     }
+
 }
