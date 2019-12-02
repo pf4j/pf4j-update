@@ -40,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 /**
  * @author Decebal Suiu
  */
@@ -366,7 +368,7 @@ public class UpdateManager {
         Path pluginsRoot = pluginManager.getPluginsRoot();
         Path file = pluginsRoot.resolve(downloaded.getFileName());
         try {
-            Files.move(downloaded, file);
+            Files.move(downloaded, file, REPLACE_EXISTING);
         } catch (IOException e) {
             throw new PluginRuntimeException("Failed to write plugin file {} to plugin folder", file);
         }
