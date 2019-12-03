@@ -31,6 +31,7 @@ public class WebServer {
 
     private int port = DEFAULT_PORT;
     private String resourceBase = DEFAULT_RESOURCE_BASE;
+    private Server server;
 
     public int getPort() {
         return port;
@@ -53,7 +54,7 @@ public class WebServer {
     }
 
     public void start() throws Exception {
-        Server server = new Server(port);
+        server = new Server(port);
         server.setStopAtShutdown(true);
 
         ResourceHandler resourceHandler = new ResourceHandler();
@@ -65,7 +66,16 @@ public class WebServer {
         server.setHandler(handlers);
 
         server.start();
-//        server.join();
+    }
+
+    public void shutdown() {
+        if (server != null && server.isRunning()) {
+            try {
+                server.stop();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed stopping server", e);
+            }
+        }
     }
 
     public static void main(String[] args) {

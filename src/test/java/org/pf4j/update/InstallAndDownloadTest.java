@@ -237,7 +237,6 @@ public class InstallAndDownloadTest {
                 br.write("plugin.class=" + NopPlugin.class.getName());
                 br.close();
                 Files.move(propsFile, propsInZip);
-                zipfs.close();
             }
         }
 

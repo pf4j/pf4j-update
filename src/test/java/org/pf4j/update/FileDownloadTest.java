@@ -15,6 +15,7 @@
  */
 package org.pf4j.update;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.pf4j.PluginRuntimeException;
@@ -52,6 +53,11 @@ public class FileDownloadTest {
         writer.write("test");
         writer.close();
         emptyFile = Files.createFile(updateRepoDir.resolve("emptyFile"));
+    }
+
+    @After
+    public void tearDown() {
+        webserver.shutdown();
     }
 
     @Test
