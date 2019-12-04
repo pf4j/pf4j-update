@@ -243,7 +243,7 @@ public class UpdateManager {
         Path pluginsRoot = pluginManager.getPluginsRoot();
         Path file = pluginsRoot.resolve(downloaded.getFileName());
         try {
-            Files.move(downloaded, file);
+            Files.move(downloaded, file, REPLACE_EXISTING);
         } catch (IOException e) {
             throw new PluginRuntimeException(e, "Failed to write file '{}' to plugins folder", file);
         }

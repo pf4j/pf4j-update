@@ -13,42 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pf4j.update;
+package org.pf4j.update.util;
 
 import org.pf4j.DefaultPluginManager;
 import org.pf4j.PluginManager;
+import org.pf4j.update.PluginInfo;
+import org.pf4j.update.UpdateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
-/**
- * @author Decebal Suiu
- */
-public class UpdateTest {
+public class TestApplication {
 
-    private static final Logger log = LoggerFactory.getLogger(UpdateTest.class);
+    private static final Logger log = LoggerFactory.getLogger(TestApplication.class);
 
-    public static void main(String[] args) {
-        update();
-    }
+    private final PluginManager pluginManager;
+    private final UpdateManager updateManager;
 
-    private static void update() {
-        // start the web server that serves the repository's artifacts
+    public TestApplication() {
+        Path pluginsPath;
         try {
-            new WebServer().start();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
+            pluginsPath = Files.createTempDirectory("plugins");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed creating temp plugins directory", e);
         }
 
-        // create plugin manager
-        PluginManager pluginManager = new DefaultPluginManager();
+        pluginManager = new DefaultPluginManager(pluginsPath);
+        updateManager = new UpdateManager(pluginManager);
+    }
+
+    public void start() {
         pluginManager.loadPlugins();
+    }
 
-        // create update manager
-        UpdateManager updateManager = new UpdateManager(pluginManager);
-
+    public void update() {
         // >> keep system up-to-date <<
         boolean systemUpToDate = true;
 
@@ -100,4 +102,11 @@ public class UpdateTest {
         }
     }
 
+    public PluginManager getPluginManager() {
+        return pluginManager;
+    }
+
+    public UpdateManager getUpdateManager() {
+        return updateManager;
+    }
 }

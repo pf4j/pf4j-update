@@ -17,43 +17,55 @@ package org.pf4j.update;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.pf4j.update.util.TestApplication;
+import org.pf4j.update.util.TestPluginsFixture;
 
 import java.io.FileWriter;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Decebal Suiu
- */
-public class RepositoriesTest {
+import static org.junit.Assert.assertEquals;
 
-    private static final String repositoriesFile = "repositories.json";
+public class UpdateIntegrationTest {
 
-    public static void main(String[] args) throws Exception {
-        FileWriter writer;
-        try {
-            writer = new FileWriter(repositoriesFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+    private WebServer webServer;
+
+    @Before
+    public void setup() throws Exception {
+        TestPluginsFixture.setup();
+
+        FileWriter writer = new FileWriter("repositories.json");
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         List<UpdateRepository> repositories = new ArrayList<UpdateRepository>();
-//        repositories.add(new UpdateRepository("local", "file:/home/decebal_suiu/work/pf4j-update/plugins/"));
         repositories.add(new DefaultUpdateRepository("localhost", new URL("http://localhost:8081/")));
-//        repositories.add(new UpdateRepository("localhost2", "http://localhost:8088/"));
-//        repositories.add(new UpdateRepository("localhost3", "http://localhost:8888/"));
 
         String json = gson.toJson(repositories);
-        try {
-            writer.write(json);
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writer.write(json);
+        writer.close();
+
+        webServer = new WebServer();
+        webServer.start();
     }
 
+    @After
+    public void tearDown() {
+        webServer.shutdown();
+    }
+
+    @Test
+    public void assertUpdateCreatesPlugins() {
+        TestApplication subject = new TestApplication();
+        subject.start();
+
+        assertEquals("Expect no plugins loaded on start", 0, subject.getPluginManager().getPlugins().size());
+
+        subject.update();
+
+        assertEquals("Expect two plugins loaded on update", 2, subject.getPluginManager().getPlugins().size());
+    }
 }

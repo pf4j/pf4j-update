@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pf4j.update;
+package org.pf4j.update.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.pf4j.update.PluginInfo;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,20 +26,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @author Decebal Suiu
- */
-public class PluginsTest {
+public class TestPluginsFixture {
 
-    private static final String pluginsJson = "plugins.json";
+    private static final String PLUGINS_JSON_FILE = "plugins.json";
 
-    public static void main(String[] args) {
+    public static void setup() {
         FileWriter writer;
         try {
-            writer = new FileWriter("downloads/" + pluginsJson);
+            writer = new FileWriter("downloads/" + PLUGINS_JSON_FILE);
         } catch (IOException e) {
-            e.printStackTrace();
-            return;
+            throw new RuntimeException("Failed creating writer for plugins manifest file", e);
         }
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -73,8 +70,7 @@ public class PluginsTest {
             writer.write(json);
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to write plugins manifest to filesystem", e);
         }
     }
-
 }
