@@ -219,7 +219,7 @@ public class UpdateManager {
      * Refreshes all repositories, so they are forced to refresh list of plugins.
      */
     public synchronized void refresh() {
-        if (repositoriesJson != null) {
+        if (repositoriesJson != null && Files.exists(repositoriesJson)) {
             initRepositoriesFromJson();
         }
         for (UpdateRepository updateRepository : repositories) {
