@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.IOException;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -88,12 +90,16 @@ public class DefaultUpdateRepository implements UpdateRepository {
         return getPlugins().get(id);
     }
 
+    protected InputStream openURL(URL url) throws IOException {
+    	return url.openStream();
+    }
+    
     private void initPlugins() {
         Reader pluginsJsonReader;
         try {
             URL pluginsUrl = new URL(getUrl(), getPluginsJsonFileName());
             log.debug("Read plugins of '{}' repository from '{}'", id, pluginsUrl);
-            pluginsJsonReader = new InputStreamReader(pluginsUrl.openStream());
+            pluginsJsonReader = new InputStreamReader(openURL(pluginsUrl));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             plugins = Collections.emptyMap();
