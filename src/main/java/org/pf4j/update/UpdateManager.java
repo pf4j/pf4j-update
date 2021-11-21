@@ -17,6 +17,7 @@ package org.pf4j.update;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.pf4j.DependencyResolver;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginState;
@@ -173,7 +174,7 @@ public class UpdateManager {
     /**
      * Add one {@link DefaultUpdateRepository}.
      *
-     * @param id of repo
+     * @param id  of repo
      * @param url of repo
      */
     public void addRepository(String id, URL url) {
@@ -206,13 +207,13 @@ public class UpdateManager {
      * @param id of repository to remove
      */
     public void removeRepository(String id) {
-      for (UpdateRepository repo : getRepositories()) {
-        if (id.equals(repo.getId())) {
-          repositories.remove(repo);
-          break;
+        for (UpdateRepository repo : getRepositories()) {
+            if (id.equals(repo.getId())) {
+                repositories.remove(repo);
+                break;
+            }
         }
-      }
-      log.warn("Repository with id " + id + " not found, doing nothing");
+        log.warn("Repository with id " + id + " not found, doing nothing");
     }
 
     /**
@@ -228,15 +229,73 @@ public class UpdateManager {
         lastPluginRelease.clear();
     }
 
+    protected void installPluginDependencies(String id, String version) {
+        installPluginDependencies(id, version, Collections.singletonList(id));
+    }
+
+    protected void installPluginDependencies(String id, String version, List<String> dependencyPath) {
+        PluginInfo plugin = getPluginsMap().get(id);
+        PluginRelease release = plugin.releases
+            .stream()
+            .filter(it -> it.version.equals(version))
+            .findFirst()
+            .orElseThrow(() ->
+                new IllegalArgumentException(
+                    String.format("Could not find version %s for plugin %s", id, version)));
+        List<PluginInfo.PluginSpec> dependencies = release.dependencies;
+
+        dependencies.forEach(dependency -> {
+            PluginWrapper installedPlugin = pluginManager.getPlugin(dependency.getPluginId());
+
+            if (dependencyPath.contains(dependency.getPluginId())) {
+                String dependencyId = dependency.getPluginId();
+                throw new PluginRuntimeException("Found circular dependency: %s",
+                    buildDependencyPathString(dependencyPath, dependencyId));
+            }
+
+            List<String> newDependencyPath = new ArrayList<>(dependencyPath);
+            newDependencyPath.add(dependency.getPluginId());
+            installPluginDependencies(id, version, newDependencyPath);
+
+            if (installedPlugin == null) {
+                installPlugin(dependency.getPluginId(), dependency.getVersion(), false);
+            } else if (!installedPlugin.getDescriptor().getVersion().equals(dependency.getVersion())) {
+                updatePlugin(dependency.getPluginId(), dependency.getVersion(), false);
+            }
+        });
+
+    }
+
     /**
      * Installs a plugin by id and version.
      *
-     * @param id the id of plugin to install
+     * @param id      the id of plugin to install
      * @param version the version of plugin to install, on SemVer format, or null for latest
      * @return true if installation successful and plugin started
-     * @exception PluginRuntimeException if plugin does not exist in repos or problems during
+     * @throws PluginRuntimeException if plugin does not exist in repos or problems during
      */
     public synchronized boolean installPlugin(String id, String version) {
+        return installPlugin(id, version, true);
+    }
+
+    /**
+     * Installs a plugin by id and version.
+     *
+     * @param id                  the id of plugin to install
+     * @param version             the version of plugin to install, on SemVer format, or null for latest
+     * @param installDependencies whether to install dependencies or not.
+     *                            This wil also update existing plugins, if the requested plugin
+     *                            requires a new version of the other installed plugin.
+     *                            This won't check if the update, conflicts with any other
+     *                            installed plugins
+     *                            Check {@link PluginInfo.PluginRelease#dependencies} for more information
+     * @return true if installation successful and plugin started
+     * @throws PluginRuntimeException if plugin does not exist in repos or problems during
+     */
+    public synchronized boolean installPlugin(String id, String version, boolean installDependencies) {
+        if (installDependencies) {
+            installPluginDependencies(id, version);
+        }
         // Download to temporary location
         Path downloaded = downloadPlugin(id, version);
 
@@ -258,7 +317,7 @@ public class UpdateManager {
      * Downloads a plugin with given coordinates, runs all {@link FileVerifier}s
      * and returns a path to the downloaded file.
      *
-     * @param id of plugin
+     * @param id      of plugin
      * @param version of plugin or null to download latest
      * @return Path to file which will reside in a temporary folder in the system default temp area
      * @throws PluginRuntimeException if download failed
@@ -310,7 +369,7 @@ public class UpdateManager {
     /**
      * Resolves Release from id and version.
      *
-     * @param id of plugin
+     * @param id      of plugin
      * @param version of plugin or null to locate latest version
      * @return PluginRelease for downloading
      * @throws PluginRuntimeException if id or version does not exist
@@ -338,12 +397,31 @@ public class UpdateManager {
     /**
      * Updates a plugin id to given version or to latest version if {@code version == null}.
      *
-     * @param id the id of plugin to update
+     * @param id      the id of plugin to update
      * @param version the version to update to, on SemVer format, or null for latest
      * @return true if update successful
-     * @exception PluginRuntimeException in case the given version is not available, plugin id not already installed etc
-    */
+     * @throws PluginRuntimeException in case the given version is not available, plugin id not already installed etc
+     */
     public boolean updatePlugin(String id, String version) {
+        return updatePlugin(id, version, true);
+    }
+
+    /**
+     * Updates a plugin id to given version or to latest version if {@code version == null}.
+     *
+     * @param id                 the id of plugin to update
+     * @param version            the version to update to, on SemVer format, or null for latest
+     * @param updateDependencies whether to update the dependency plugins of the plugin as well.
+     *                           This also installs new dependencies the previous plugin version
+     *                           did not have
+     *                           Check {@link PluginInfo.PluginRelease#dependencies} for more information
+     * @return true if update successful
+     * @throws PluginRuntimeException in case the given version is not available, plugin id not already installed etc
+     */
+    public boolean updatePlugin(String id, String version, boolean updateDependencies) {
+        if (updateDependencies) {
+            installPluginDependencies(id, version);
+        }
         if (pluginManager.getPlugin(id) == null) {
             throw new PluginRuntimeException("Plugin {} cannot be updated since it is not installed", id);
         }
@@ -438,4 +516,17 @@ public class UpdateManager {
         }
     }
 
+
+    protected String buildDependencyPathString(List<String> dependencyPath, String dependency) {
+        List<String> path = new ArrayList<>(dependencyPath);
+        path.add(dependency);
+        StringBuilder builder = new StringBuilder();
+
+        path.forEach(item -> {
+            builder.append(item);
+            builder.append(" -> ");
+        });
+
+        return builder.toString();
+    }
 }

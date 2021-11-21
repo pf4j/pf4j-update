@@ -69,6 +69,10 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
         public Date date;
         public String requires;
         public String url;
+        /**
+         * A list of {@link PluginSpec plugin specs} this plugin depends on.
+         */
+        public List<PluginSpec> dependencies;
 
         /**
          * Optional sha512 digest checksum. Can be one of
@@ -88,9 +92,31 @@ public class PluginInfo implements Serializable, Comparable<PluginInfo> {
                 ", requires='" + requires + '\'' +
                 ", url='" + url + '\'' +
                 ", sha512sum='" + sha512sum + '\'' +
+                ", dependencies='" + dependencies + '\'' +
                 '}';
         }
 
     }
 
+    /**
+     * Specification of a specific plugin version.
+     */
+    public static class PluginSpec implements Serializable {
+
+        private final String pluginId;
+        private final String version;
+
+        public PluginSpec(String pluginId, String version) {
+            this.pluginId = pluginId;
+            this.version = version;
+        }
+
+        public String getPluginId() {
+            return pluginId;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+    }
 }
