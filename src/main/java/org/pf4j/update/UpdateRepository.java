@@ -64,7 +64,8 @@ public interface UpdateRepository {
 
     /**
      * Gets a file verifier to execute on the downloaded file for it to be claimed valid.
-     * May be a CompoundVerifier in order to chain several verifiers.
+     * Maybe a CompoundVerifier in order to chain several verifiers.
+     *
      * @return {@link FileVerifier}
      */
     FileVerifier getFileVerifier();

@@ -47,7 +47,7 @@ public interface FileVerifier {
         public String requires;
         public String url;
         public String sha512sum;
-        public Map<String,Object> meta = new HashMap<>();
+        public Map<String, Object> meta = new HashMap<>();
 
         public Context(String id, PluginInfo.PluginRelease pluginRelease) {
             this.id = id;

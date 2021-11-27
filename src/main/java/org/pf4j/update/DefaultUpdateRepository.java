@@ -33,6 +33,7 @@ import java.util.*;
 
 /**
  * The default implementation of {@link UpdateRepository}.
+ * This implementation reads information about plugins from a JSON file ({@code plugins.json} by default).
  *
  * @author Decebal Suiu
  */
@@ -41,8 +42,8 @@ public class DefaultUpdateRepository implements UpdateRepository {
     private static final String DEFAULT_PLUGINS_JSON_FILENAME = "plugins.json";
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
 
-    private String id;
-    private URL url;
+    private final String id;
+    private final URL url;
     private String pluginsJsonFileName;
 
     private Map<String, PluginInfo> plugins;
@@ -61,9 +62,9 @@ public class DefaultUpdateRepository implements UpdateRepository {
     }
 
     public DefaultUpdateRepository(String id, URL url, String pluginsJsonFileName) {
-	this.id = id;
-	this.url = url;
-	this.pluginsJsonFileName = pluginsJsonFileName;
+        this.id = id;
+        this.url = url;
+        this.pluginsJsonFileName = pluginsJsonFileName;
     }
 
     @Override
@@ -91,7 +92,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
     }
 
     protected InputStream openURL(URL url) throws IOException {
-    	return url.openStream();
+        return url.openStream();
     }
     
     private void initPlugins() {
@@ -166,7 +167,7 @@ public class DefaultUpdateRepository implements UpdateRepository {
      * Choose another file name than {@code plugins.json}.
      *
      * @param pluginsJsonFileName the name (relative) of plugins.json file. 
-	 * If null, will default to {@code plugins.json}
+     * If null, will default to {@code plugins.json}
      */
     public void setPluginsJsonFileName(String pluginsJsonFileName) {
         this.pluginsJsonFileName = pluginsJsonFileName;

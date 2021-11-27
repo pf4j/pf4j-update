@@ -43,15 +43,19 @@ import java.util.Map;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /**
+ * Handles the PF4J install, uninstall and update process.
+ * This class works with multiple {@link UpdateRepository} to retrieve information about plugins.
+ * By default, the repositories are loaded from {@code repositories.json} file.
+ *
  * @author Decebal Suiu
  */
 public class UpdateManager {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateManager.class);
 
-    private PluginManager pluginManager;
-    private VersionManager versionManager;
-    private String systemVersion;
+    private final PluginManager pluginManager;
+    private final VersionManager versionManager;
+    private final String systemVersion;
     private Path repositoriesJson;
 
     // cache last plugin release per plugin id (the key)
