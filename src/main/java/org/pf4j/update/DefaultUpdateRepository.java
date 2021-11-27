@@ -39,8 +39,9 @@ import java.util.*;
  */
 public class DefaultUpdateRepository implements UpdateRepository {
 
-    private static final String DEFAULT_PLUGINS_JSON_FILENAME = "plugins.json";
     private static final Logger log = LoggerFactory.getLogger(DefaultUpdateRepository.class);
+
+    public static final String DEFAULT_PLUGINS_JSON_FILENAME = "plugins.json";
 
     private final String id;
     private final URL url;

@@ -53,6 +53,8 @@ public class UpdateManager {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateManager.class);
 
+    public static final String DEFAULT_REPOSITORIES_JSON_FILENAME = "repositories.json";
+
     private final PluginManager pluginManager;
     private final VersionManager versionManager;
     private final String systemVersion;
@@ -68,7 +70,7 @@ public class UpdateManager {
 
         versionManager = pluginManager.getVersionManager();
         systemVersion = pluginManager.getSystemVersion();
-        repositoriesJson = Paths.get("repositories.json");
+        repositoriesJson = Paths.get(DEFAULT_REPOSITORIES_JSON_FILENAME);
     }
 
     public UpdateManager(PluginManager pluginManager, Path repositoriesJson) {
