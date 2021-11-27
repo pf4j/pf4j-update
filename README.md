@@ -34,7 +34,7 @@ You may want to check for the latest released version using [Maven Search](http:
 How to use
 -------------------
 It's very simple to add pf4j-update in your application.
-The whole code of below snippet is available on [Github](https://github.com/pf4j/pf4j-update/blob/master/src/test/java/org/pf4j/update/UpdateTest.java). 
+The whole code of below snippet is available on [Github](https://github.com/pf4j/pf4j-update/blob/master/src/test/java/org/pf4j/update/util/TestApplication.java). 
 
 ```java
 public static void main(String[] args) {
