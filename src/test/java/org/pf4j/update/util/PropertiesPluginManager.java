@@ -23,7 +23,6 @@ import java.nio.file.Path;
 
 /**
  * Manager using properties instead of manifest, for testing.
- *
  */
 public class PropertiesPluginManager extends DefaultPluginManager {
 
@@ -33,11 +32,6 @@ public class PropertiesPluginManager extends DefaultPluginManager {
 
     @Override
     protected PluginDescriptorFinder createPluginDescriptorFinder() {
-        return new PropertiesPluginDescriptorFinder("my.properties");
-    }
-
-    @Override
-    protected PluginDescriptorFinder getPluginDescriptorFinder() {
         return new PropertiesPluginDescriptorFinder("my.properties");
     }
 
