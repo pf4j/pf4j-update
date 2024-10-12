@@ -20,6 +20,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.pf4j.PluginManager;
+import org.pf4j.PluginNotFoundException;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.TestPluginDescriptor;
@@ -165,7 +166,7 @@ public class InstallAndDownloadTest {
         assertFalse(updateManager.updatePlugin("myPlugin", null)); // Update to latest
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = PluginNotFoundException.class)
     public void uninstallNonExisting() {
         updateManager.uninstallPlugin("other");
     }
